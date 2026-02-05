@@ -15,7 +15,7 @@ Unlike general LLMs that may hallucinate or prioritize SEO content, CliniClarity
 * **Context Aware:** The assistant understands the specific context of the user's health report before searching for answers
 * **Authority-First:** Prioritizes peer-reviewed status and impact factor by querying high-authority databases like PubMed or PMC
 
-## 🛠️ Product Architecture: Dual-Phase Intelligence
+## 🛠️ Product Architecture
 The product lifecycle is built on a "Privacy by Design" framework, ensuring healthcare-grade security and technical transparency
 #### The Agent Lifecycle
 1. **Automated Insight Generation (RAG):** Upon document upload, the system intiates a Retrieval-Augmented Generation (RAG) pipline to synthesize the report
@@ -27,4 +27,9 @@ The product lifecycle is built on a "Privacy by Design" framework, ensuring heal
      * The LLM follows a Thinking -> Action -> Observation loop to determine if the internal record provides enough information or if external validation is required
      * If the internal report lacks necessary clinical background, the agent executes a search tool to query high-authority databases like PubMed
      * The result from PubMed is passed back to LLM as part of the observation, ensuring the final answer is a synthesis fo patient's data and peer-reviewed literature
-     * Every response is cited with a specific DOI from the medical journal to ensure 100% auditability. 
+     * Every response is cited with a specific DOI from the medical journal to ensure 100% auditability.
+* **Tech Stack**: Built using AWS Bedrock, OpenSearch Serverless, and Claude Sonnet/Nova Pro
+#### Security & HIPAA-First Data Pipeline
+To ensure sensitive data is never used to train public models, CliniClarity implements an automated redaction pipeline.
+    * **PII/PHI Redaction:** A dedicated Lambda function matches PHI found by AWS Comprehend Medical to coordinates provided by AWS Textract
+    * **Sanitization:** Uses the ReportLab library to draw solid black boxes over sensitive metadata, ensuring it cannot be searched or highlighted.
