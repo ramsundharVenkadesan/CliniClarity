@@ -35,8 +35,9 @@ To ensure sensitive data is never used to train public models, CliniClarity impl
 * **Sanitization:** Uses the ReportLab library to draw solid black boxes over sensitive metadata, ensuring it cannot be searched or highlighted.
 
 ## 🚀 Key Benefits
-Feature,Traditional LLMs / Search Engines,CliniClarity
-Accuracy,Guesses based on patterns; SEO-driven ,Grounded in patient records and vetted journals 
-Security,Data may be used for public training ,Healthcare-grade security with PII redaction
-Logic,Single-shot responses,ReAct loop (Think -> Action -> Observation) 
-Traceability,Often lacks direct citations,Direct links to DOIs and record lines 
+Feature,Traditional LLMs / Search Engines,CliniClarity (Our Product),PLM Strategic Value
+Information Source,Guesses based on patterns or SEO-optimized blogs ,Grounded in patient records and vetted medical journals ,"Trust: Reduces ""medical anxiety"" by ensuring 100% clinical validity."
+Logic & Reasoning,"Single-shot responses often prone to ""hallucinations"" ",ReAct Loop: Thinking -> Action -> Observation before answering ,"Accuracy: Forces the model to ""think"" and verify before responding."
+Data Privacy,Sensitive data may be used to train public models ,Healthcare-grade security with automated PII/PHI redaction ,"Compliance: Built with ""Privacy by Design"" to meet HIPAA-grade standards."
+Traceability,Provides general advice without specific source links ,Every statement is directly linked to a record line or a DOI ,Auditability: Empowers patients with exact evidence for doctor consultations.
+Knowledge Retrieval,Limited to the model's training cutoff date,Tiered Retrieval: Vector Store (Internal) + PubMed (External) ,"Efficiency: Prioritizes user context first, augmenting with external data only when needed." 
