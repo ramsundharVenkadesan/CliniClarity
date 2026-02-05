@@ -38,7 +38,7 @@ The lifecycle begins with a "Privacy by Design" ingestion process to ensure HIPA
 |-----------------|----------------------------------|------|
 | Accuracy | Grounding Rate | 100% of responses must be traceable to a record line or DOI |
 | Trust | Hallucination Rate | <1% occurrence of "General Medical Advice" outside of vetted journals |
-| Performance | Inference Latency | Phase I Summary delivered in <5s; Phase II ReAct loop in <12s |
+| Performance | Inference Latency | Phase I Summary delivered in <10s; Phase II ReAct loop in <15s |
 | Security | PHI Redaction Success | Zero sensitive metadata found in the OpenSearch vector store |
 | User Value | Query-to-Consultation Ratio | Number of evidence-based questions generated per report uploaded |
 
