@@ -50,3 +50,20 @@ This product was developed by a cross-functional team with expertise across the 
 * **Greti:** Machine Learning, Testing and QA
 * **Ramsundhar:** Cloud Architecture and Agentic AI
 
+## Technical Appendix
+#### Orchestration: LangChain & Agentic Logic
+To manage the complex ReAct (Reasoning and Acting) loop, we utilize LangChain as the core orchestration framework. This allows us to move beyond simple chat interfaces into autonomous problem-solving.
+* **State Management:** LangChain manages the conversational memory and the "state" of the research assistant, ensuring that follow-up questions maintain the context of the initial medical report.
+* **Tool Binding:** We use LangChain to bind the Tavily Search API and PubMed as executable tools that the LLM can "decide" to call when internal context from the vector store is insufficient.
+* **Prompt Engineering:** LangChain templates are used to enforce the Thinking -> Action -> Observation cycle, preventing the model from providing unverified medical advice by strictly defining its persona as a "Research Librarian".
+#### Infrastructure as Code (IaC): Terraform
+To ensure the product can be deployed reliably across different environments (Dev, QA, Production), the entire AWS architecture is managed via Terraform.
+* **Reproducibility:** Every component—from S3 buckets and Lambda functions to OpenSearch Serverless collections—is defined in declarative .tf files.
+* **Security Configuration:** Terraform is used to manage strict IAM roles and policies, ensuring the "Principle of Least Privilege" is applied to the data redaction pipeline.
+* **Scalability:** By using Terraform modules, we can quickly scale the Bedrock Knowledge Bases and vector indices as the volume of processed medical documents grows.
+#### Core AWS Services
+* **AWS Bedrock:** Provides access to high-performance models like Claude Sonnet and Nova Pro via a serverless API, reducing the overhead of managing specialized AI hardware.
+* **OpenSearch Serverless:** Serves as our vector database, storing embeddings of patient reports for sub-second retrieval during the RAG phase.
+* **Lambda & S3 Event Notifications:** Automates the lifecycle of a document; the moment a PDF hits the `/INPUT` bucket, a Lambda triggers the redaction and subsequent ingestion jobs.
+* **Comprehend Medical:** An NLP service specifically tuned to detect Protected Health Information (PHI) within clinical text, forming the backbone of our HIPAA compliance strategy.
+
