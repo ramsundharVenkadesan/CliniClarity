@@ -25,3 +25,12 @@ This section details the two-phase logic that manages the transition from static
     * **Augmentation:** If internal data is insufficient, it invokes the Tavily Search API to query PubMed or PMC.
     * **Observation:** Clinical data from external sources is passed back to the LLM.
   * **Output:** A response cited by specific record lines or a medical DOI
+## System Architecture: The Data Pipeline
+The lifecycle begins with a "Privacy by Design" ingestion process to ensure HIPAA-grade data handling.
+* **S3 Ingestion & Trigger:** Medical documents are uploaded to an /INPUT S3 bucket, which immediately triggers a Lambda Function.
+* **Automated Redaction (Security):**
+    * The Lambda calls AWS Textract to create bounding boxes with exact coordinates for every word.
+    * Text is sent to Comprehend Medical (DetectPHI) to identify sensitive entities (MRNs, names, etc.).
+    * A final Lambda function matches the PHI to the coordinates and uses the ReportLab library to draw solid black boxes over the text metadata.
+
+* **Vectorization & Bedrock:** Sanitized PDFs are saved to an `/OUTPUT` S3 bucket, triggering the Bedrock Knowledge Bases ingestion job to chunk and store data in OpenSearch.
