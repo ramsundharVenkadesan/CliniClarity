@@ -59,8 +59,8 @@ resource "aws_iam_role_policy" "function_permissions" {
 
 data "archive_file" "lambda_file" {
   type = "zip"
-  source_file = "${path.module}/data_preparation.py"
-  output_path = "${path.module}/data_prep_payload.zip"
+  source_file = "${path.module}/lambda_function.py"
+  output_path = "${path.module}/lamdba_function_payload.zip"
 }
 
 resource "aws_lambda_function" "lambda_function" {
