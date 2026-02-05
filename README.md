@@ -31,5 +31,5 @@ The product lifecycle is built on a "Privacy by Design" framework, ensuring heal
 * **Tech Stack**: Built using AWS Bedrock, OpenSearch Serverless, and Claude Sonnet/Nova Pro
 #### Security & HIPAA-First Data Pipeline
 To ensure sensitive data is never used to train public models, CliniClarity implements an automated redaction pipeline.
-    * **PII/PHI Redaction:** A dedicated Lambda function matches PHI found by AWS Comprehend Medical to coordinates provided by AWS Textract
-    * **Sanitization:** Uses the ReportLab library to draw solid black boxes over sensitive metadata, ensuring it cannot be searched or highlighted.
+* **PII/PHI Redaction:** A dedicated Lambda function matches PHI found by AWS Comprehend Medical to coordinates provided by AWS Textract
+* **Sanitization:** Uses the ReportLab library to draw solid black boxes over sensitive metadata, ensuring it cannot be searched or highlighted.
