@@ -43,3 +43,10 @@ To ensure sensitive data is never used to train public models, CliniClarity impl
 | **Traceability** | Provides general advice without specific source links | Every statement is directly linked to a record line or a DOI | **Auditability:** Empowers patients with exact evidence for doctor consultations |
 | **Knowledge Retrieval** | Limited to the model's training cutoff date | Tiered Retrieval: Vector Store (Internal) + PubMed (External) | **Efficiency:** Prioritizes user context first, augmenting with external data only when needed |
 
+## 👥 The Team
+This product was developed by a cross-functional team with expertise across the full software lifecycle:
+* **Bruno:** Containerization and Infrastructure
+* **Niall:** User research and HIPAA Compliance
+* **Greti:** Machine Learning, Testing and QA
+* **Ramsundhar:** Cloud Architecture and Agentic AI
+
