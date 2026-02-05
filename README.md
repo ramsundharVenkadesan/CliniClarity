@@ -33,3 +33,10 @@ The product lifecycle is built on a "Privacy by Design" framework, ensuring heal
 To ensure sensitive data is never used to train public models, CliniClarity implements an automated redaction pipeline.
 * **PII/PHI Redaction:** A dedicated Lambda function matches PHI found by AWS Comprehend Medical to coordinates provided by AWS Textract
 * **Sanitization:** Uses the ReportLab library to draw solid black boxes over sensitive metadata, ensuring it cannot be searched or highlighted.
+
+## 🚀 Key Benefits
+Feature,Traditional LLMs / Search Engines,CliniClarity
+Accuracy,Guesses based on patterns; SEO-driven ,Grounded in patient records and vetted journals 
+Security,Data may be used for public training ,Healthcare-grade security with PII redaction
+Logic,Single-shot responses,ReAct loop (Think -> Action -> Observation) 
+Traceability,Often lacks direct citations,Direct links to DOIs and record lines 
