@@ -57,3 +57,23 @@ resource "aws_iam_role_policy" "function_permissions" {
   policy = data.aws_iam_policy_document.lambda_processing.json
 }
 
+data "archive_file" "lambda_file" {
+  type = "zip"
+  source_file = "${path.module}/data_preparation.py"
+  output_path = "${path.module}/data_prep_payload.zip"
+}
+
+resource "aws_lambda_function" "lambda_function" {
+  filename = data.archive_file.lambda_file.output_path
+  function_name = "data_preparation_lambda"
+  role = aws_iam_role.function_execution.arn
+  handler = "data_preparation.lambda_handler"
+  source_code_hash = data.archive_file.lambda_file.output_base64sha256
+  runtime = "python3.8"
+
+  tags = {
+    Env = local.environment
+    Project = local.project
+    Purpose = "Lambda Function to invoke Textract when a PDF is uploaded to S3"
+  }
+}
