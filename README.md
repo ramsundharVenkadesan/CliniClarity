@@ -17,7 +17,7 @@ Unlike general LLMs that may hallucinate or prioritize SEO content, CliniClarity
 
 ## 🛠️ Product Architecture: Dual-Phase Intelligence
 The product lifecycle is built on a "Privacy by Design" framework, ensuring healthcare-grade security and technical transparency
-1. **The Agent Lifecycle**
+#### The Agent Lifecycle
     1. **Automated Insight Generation (RAG):** Upon document upload, the system intiates a Retrieval-Augmented Generation (RAG) pipline to synthesize the report
           *  The PDF data is chunked and converted into vectors (embeddings) stored within OpenSearch Serveless
           *  The LLM uses the vector store to ground results, automatically extracting key bio-markers and translating complex lab values into a high-level summary for the user
