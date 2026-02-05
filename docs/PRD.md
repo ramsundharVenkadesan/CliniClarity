@@ -32,5 +32,14 @@ The lifecycle begins with a "Privacy by Design" ingestion process to ensure HIPA
     * The Lambda calls AWS Textract to create bounding boxes with exact coordinates for every word.
     * Text is sent to Comprehend Medical (DetectPHI) to identify sensitive entities (MRNs, names, etc.).
     * A final Lambda function matches the PHI to the coordinates and uses the ReportLab library to draw solid black boxes over the text metadata.
-
 * **Vectorization & Bedrock:** Sanitized PDFs are saved to an `/OUTPUT` S3 bucket, triggering the Bedrock Knowledge Bases ingestion job to chunk and store data in OpenSearch.
+## Sucess Metrics (KPIs)
+| Metric Category | Key Performance Indicator (KPI) | Goal |
+|-----------------|----------------------------------|------|
+| Accuracy | Grounding Rate | 100% of responses must be traceable to a record line or DOI |
+| Trust | Hallucination Rate | <1% occurrence of "General Medical Advice" outside of vetted journals |
+| Performance | Inference Latency | Phase I Summary delivered in <5s; Phase II ReAct loop in <12s |
+| Security | PHI Redaction Success | Zero sensitive metadata found in the OpenSearch vector store |
+| User Value | Query-to-Consultation Ratio | Number of evidence-based questions generated per report uploaded |
+
+
