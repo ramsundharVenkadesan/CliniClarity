@@ -43,6 +43,7 @@ def lambda_handler(event, context):
         status = "IN_PROGRESS"
 
         while status == "IN_PROGRESS":
+            print(f"Textract Job {job_id} is still in progress.. waiting 5 seconds..")
             time.sleep(5)
             check_response = textract.get_document_analysis(JobId=job_id)
             status = check_response['JobStatus']
