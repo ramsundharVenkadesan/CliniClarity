@@ -53,7 +53,8 @@ def lambda_handler(event, context):
                     full_text += block['Text'] + ' '
             phi_response = comprehend_medical.detect_phi(Text=full_text[:10000])
             phi_entities = phi_response['Entities']
-            print(f"Detected PHI Entities: {phi_entities}")
+            clean_path = redact_pdf(bucket, key, phi_entities)
+            print(f"Sanitized File Saved To: {clean_path}")
         return {
             'statusCode': 200,
             'body': json.dumps({'message': 'Textract Job Started Successfully', 'jobId': job_id, 'File': key})
