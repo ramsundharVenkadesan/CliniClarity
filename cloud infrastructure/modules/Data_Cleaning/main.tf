@@ -77,3 +77,22 @@ resource "aws_lambda_function" "lambda_function" {
     Purpose = "Lambda Function to invoke Textract when a PDF is uploaded to S3"
   }
 }
+
+resource "aws_lambda_permission" "allow_bucket" {
+  statement_id = "AllowExecutionFromS3Bucket"
+  action = "lambd:InvokeFunction"
+  function_name = aws_lambda_function.lambda_function.function_name
+  principal = "s3.amazonaws.com"
+  source_arn = aws_s3_bucket.patient_data.arn
+}
+
+resource "aws_s3_bucket_notification" "bucket_notification" {
+  bucket = aws_s3_bucket.patient_data.id
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.lambda_function.arn
+    events = ["s3:ObjectCreated:*"]
+  }
+
+  depends_on = [aws_lambda_permission.allow_bucket]
+}
