@@ -10,6 +10,4 @@ terraform { // Terraform code block to connect the configuration to external pro
 
 provider "aws" { // Configuring AWS provider
   region = "us-east-1" // Region argument to specify where the infrastructure will be deployed
-  access_key = "AKIAY6XS5MEXRSRBFKWA"
-  secret_key= "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"
 }
