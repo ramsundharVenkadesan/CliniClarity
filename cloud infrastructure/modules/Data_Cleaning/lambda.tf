@@ -25,15 +25,15 @@ resource "null_resource" "build_lambda_layer" {
   }
 }
 
-resource "aws_lambda_layer_version" "package_layer" {
-  filename            = data.archive_file.layer_zip.output_path
-  source_code_hash    = data.archive_file.layer_zip.output_base64sha256
-  layer_name          = "pymupdf_lib"
-  compatible_runtimes = ["python3.8"]
-}
-
 data "archive_file" "lambda_file" {
   type = "zip"
   source_file = "${path.module}/lambda_function.py"
   output_path = "${path.module}/lamdba_function_payload.zip"
+}
+
+resource "aws_lambda_layer_version" "package_layer" {
+  filename            = data.archive_file.lambda_file.output_path
+  source_code_hash    = data.archive_file.lambda_file.output_base64sha256
+  layer_name          = "pymupdf_lib"
+  compatible_runtimes = ["python3.8"]
 }

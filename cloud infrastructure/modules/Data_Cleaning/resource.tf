@@ -11,10 +11,4 @@ resource "aws_lambda_function" "lambda_function" {
   runtime = "python3.8"
 
   depends_on = [aws_cloudwatch_log_group.lambda_log_group]
-
-  tags = {
-    Env = local.environment
-    Project = local.project
-    Purpose = "Lambda Function to invoke Textract when a PDF is uploaded to S3"
-  }
 }
