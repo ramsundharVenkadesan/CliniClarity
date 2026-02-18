@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CliniClarity | Upload</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; }
+        input { margin: 1rem 0; }
+        button { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🩺 CliniClarity</h1>
+        <p>Upload a Medical PDF to get a simplified summary.</p>
+        <form action="/rag/process-pdf/" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept="application.pdf" required><br>
+    <button type="submit">Analyze Report</button>
+</form>
+    </div>
+</body>
+</html>
