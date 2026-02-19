@@ -56,7 +56,8 @@ graph TD
     LLM -->|Final Answer: 6th Grade Level| Response[User Health Summary]
     Response --> User
 
-    %% High-Contrast Styling
-    style ReACT fill:#f0f0f0,stroke:#333,stroke-width:2px
-    style Redactor fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    style API fill:#ffffff,stroke:#333
+    %% Enhanced Visibility Styling
+    style API fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style ReACT fill:#fff8e1,stroke:#fbc02d,stroke-width:2px
+    style Redactor fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style RAG_Router fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
