@@ -18,7 +18,7 @@ This directory contains the autonomous reasoning core for CliniClarity. It is ar
 2.  **Persona-Driven:** The system prompt enforces a "Patient Advocate" persona to ensure empathetic and accessible communication.
 3.  **Accuracy-Focused:** Search tools are restricted to reputable clinical domains to prevent "hallucinations" based on non-medical sources.
 
-4.  ## 🏗️ Architecture Overview
+## 🏗️ System Architecture
 
 ```mermaid
 graph TD
@@ -56,5 +56,7 @@ graph TD
     LLM -->|Final Answer: 6th Grade Level| Response[User Health Summary]
     Response --> User
 
-    style Agent fill:#f9f,stroke:#333,stroke-width:2px
-    style Redactor fill:#bbf,stroke:#333
+    %% High-Contrast Styling
+    style ReACT fill:#f0f0f0,stroke:#333,stroke-width:2px
+    style Redactor fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style API fill:#ffffff,stroke:#333
