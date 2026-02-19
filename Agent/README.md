@@ -21,35 +21,40 @@ This directory contains the autonomous reasoning core for CliniClarity. It is ar
 4.  ## 🏗️ Architecture Overview
 
 ```mermaid
-graph LR
-    %% Entry Point
-    Input((User Question)) --> Agent[ReACT Agent Logic<br/>ReACT.py]
+graph TD
+    %% User Interaction
+    User((User)) -->|Upload PDF| API[API.py / FastAPI]
+    User -->|Ask Question| API
 
-    subgraph "Privacy & Pre-processing"
-        Agent -.-> Redactor[Redaction Logic<br/>Redaction.py]
-        Redactor --> Presidio[Presidio Analyzer/Anonymizer]
-        Presidio -.-> |Scrubbed Context| Agent
+    subgraph "Ingestion & Privacy Layer"
+        API -->|Route: /rag/process-pdf| RAG_Router[RAG.py]
+        RAG_Router -->|Raw Text| Redactor[Redaction.py / Presidio]
+        Redactor -->|Analyzes PII| Analyzer[AnalyzerEngine]
+        Analyzer -->|Anonymizes| Anonymizer[AnonymizerEngine]
+        Anonymizer -->|Scrubbed Text| Splitter[RecursiveCharacterTextSplitter]
     end
 
-    subgraph "Reasoning Loop (Thought-Action-Observation)"
-        Agent --> Choice{Tool Choice}
+    subgraph "Vector Storage"
+        Splitter -->|Chunks| Embed[Gemini-Embedding-001]
+        Embed -->|Vectors| Pinecone[(Pinecone Vector Store)]
+    end
+
+    subgraph "Reasoning & Retrieval Layer"
+        API -->|Route: /question/| ReACT[ReACT.py / Agent]
+        ReACT -->|Thought/Action| Selector{Agent Executor}
         
-        %% Internal Path
-        Choice -->|Internal Data| RetTool[Retriever Tool]
-        RetTool --> Pinecone[(Pinecone Vector Store)]
-        Pinecone -->|Redacted Medical Facts| Obs1[Observation]
+        Selector -->|Action 1| RetTool[Retriever Tool]
+        RetTool -->|Search| Pinecone
         
-        %% External Path
-        Choice -->|Medical Validation| SearchTool[Tavily Search]
-        SearchTool --> PubMed[NCBI/PubMed Domains]
-        PubMed -->|External Context| Obs2[Observation]
+        Selector -->|Action 2| SearchTool[Tavily Search]
+        SearchTool -->|External Search| PubMed[PubMed/NCBI]
+        
+        Selector -->|Observation| LLM[Gemini-3-Flash]
     end
 
     %% Final Output
-    Obs1 --> Agent
-    Obs2 --> Agent
-    Agent -->|Gemini-3-Flash| Final[6th-Grade Level Summary]
-    Final --> Output((Final Answer))
+    LLM -->|Final Answer: 6th Grade Level| Response[User Health Summary]
+    Response --> User
 
     style Agent fill:#f9f,stroke:#333,stroke-width:2px
     style Redactor fill:#bbf,stroke:#333
