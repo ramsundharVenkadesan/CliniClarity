@@ -21,43 +21,53 @@ This directory contains the autonomous reasoning core for CliniClarity. It is ar
 ## 🏗️ System Architecture
 
 ```mermaid
-graph TD
-    %% User Interaction
-    User((User)) -->|Upload PDF| API[API.py / FastAPI]
-    User -->|Ask Question| API
-
-    subgraph "Ingestion & Privacy Layer"
-        API -->|Route: /rag/process-pdf| RAG_Router[RAG.py]
-        RAG_Router -->|Raw Text| Redactor[Redaction.py / Presidio]
-        Redactor -->|Analyzes PII| Analyzer[AnalyzerEngine]
-        Analyzer -->|Anonymizes| Anonymizer[AnonymizerEngine]
-        Anonymizer -->|Scrubbed Text| Splitter[RecursiveCharacterTextSplitter]
-    end
-
-    subgraph "Vector Storage"
-        Splitter -->|Chunks| Embed[Gemini-Embedding-001]
-        Embed -->|Vectors| Pinecone[(Pinecone Vector Store)]
-    end
-
-    subgraph "Reasoning & Retrieval Layer"
-        API -->|Route: /question/| ReACT[ReACT.py / Agent]
-        ReACT -->|Thought/Action| Selector{Agent Executor}
-        
-        Selector -->|Action 1| RetTool[Retriever Tool]
-        RetTool -->|Search| Pinecone
-        
-        Selector -->|Action 2| SearchTool[Tavily Search]
-        SearchTool -->|External Search| PubMed[PubMed/NCBI]
-        
-        Selector -->|Observation| LLM[Gemini-3-Flash]
-    end
-
-    %% Final Output
-    LLM -->|Final Answer: 6th Grade Level| Response[User Health Summary]
-    Response --> User
-
-    %% High-Contrast Styling with Explicit Black Text (color:#000)
-    style API fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#000
-    style ReACT fill:#fff8e1,stroke:#fbc02d,stroke-width:2px,color:#000
-    style Redactor fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#000
-    style RAG_Router fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+flowchart TD
+    Start([User Access]) --> Home[Home Page<br/>upload.html]
+    
+    Home --> Upload{Upload PDF}
+    Home --> Question{Ask Question}
+    
+    Upload --> RAG[RAG Pipeline<br/>RAG.py]
+    Question --> ReACT[ReACT Agent<br/>ReACT.py]
+    
+    RAG --> LoadPDF[Load PDF<br/>PyMuPDFLoader]
+    LoadPDF --> Redact[PII Redaction<br/>Redaction.py]
+    
+    Redact --> Presidio[Presidio Analyzer<br/>& Anonymizer]
+    Presidio --> RedactedDoc[Redacted Document<br/>PERSON, PHONE, EMAIL, etc.]
+    
+    RedactedDoc --> Split[Text Splitting<br/>RecursiveCharacterTextSplitter]
+    Split --> Embed[Generate Embeddings<br/>Google Gemini Embedding]
+    Embed --> Store[Store in Vector DB<br/>Pinecone]
+    
+    Store --> Retrieve[Retrieve Context<br/>k=3 chunks]
+    Retrieve --> LLM1[LLM Processing<br/>Gemini Flash]
+    LLM1 --> Template[Medical Summary Template<br/>6th-grade reading level]
+    Template --> Report[HTML Report<br/>report.html]
+    
+    ReACT --> Tools{Agent Tools}
+    Tools --> RetrieverTool[Retriever Tool<br/>Search Patient Report]
+    Tools --> TavilyTool[Tavily Search<br/>PubMed Medical Info]
+    
+    RetrieverTool --> VectorStore[Pinecone Vector Store<br/>Patient's Report]
+    TavilyTool --> PubMed[PubMed Database<br/>Medical Literature]
+    
+    VectorStore --> AgentLLM[ReACT Agent Loop<br/>Gemini Flash]
+    PubMed --> AgentLLM[ReACT Agent Loop<br/>Gemini Flash]
+    
+    AgentLLM --> Think[Thought]
+    Think --> Action[Action]
+    Action --> Observe[Observation]
+    Observe --> Decide{Final Answer?}
+    Decide -->|No| Think
+    Decide -->|Yes| Answer[Patient-Friendly Answer<br/>6th-grade level]
+    
+    Report --> End([User Views Summary])
+    Answer --> End
+    
+    style RAG fill:#0066cc,stroke:#003366,stroke-width:3px,color:#fff
+    style ReACT fill:#ff8800,stroke:#cc6600,stroke-width:3px,color:#fff
+    style Redact fill:#cc0000,stroke:#990000,stroke-width:3px,color:#fff
+    style LLM1 fill:#009900,stroke:#006600,stroke-width:3px,color:#fff
+    style AgentLLM fill:#009900,stroke:#006600,stroke-width:3px,color:#fff
+    style Presidio fill:#cc0000,stroke:#990000,stroke-width:3px,color:#fff
