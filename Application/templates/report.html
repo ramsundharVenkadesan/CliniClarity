@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CliniClarity | Medical Summary</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; padding: 40px; }
+        .container { max-width: 850px; margin: auto; background: white; padding: 50px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .header { border-bottom: 3px solid #3498db; margin-bottom: 30px; padding-bottom: 10px; }
+        h1 { color: #2c3e50; font-size: 28px; margin: 0; }
+        .content { color: #444; line-height: 1.8; }
+        /* Styling for the Markdown elements */
+        .content h2 { color: #2980b9; border-left: 5px solid #2980b9; padding-left: 15px; margin-top: 40px; }
+        .content strong { color: #e74c3c; }
+        .footer-info { margin-top: 50px; font-size: 12px; color: #95a5a6; text-align: center; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🩺 CliniClarity Patient Report</h1>
+        </div>
+        <div class="content">
+            {{ summary_html | safe }}
+        </div>
+        <div class="footer-info">
+            Generated via CliniClarity AI | Chunks Analyzed: {{ chunks }} | Sources: {{ sources }}
+        </div>
+        <hr style="margin-top: 50px; border: 1px solid #eee;">
+<div class="chat-section">
+    <h3>🔍 Dive Deeper into this Report</h3>
+    <p style="color: #666; font-size: 14px;">Ask follow-up questions about your diagnosis, labs, or search PubMed for the latest research.</p>
+
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <input type="text" id="userQuestion" placeholder="e.g., What are the typical treatments for this mass?" style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+        <button onclick="askAgent()" id="askBtn" style="background: #3498db; color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer;">Ask AI</button>
+    </div>
+
+    <div id="answerBox" style="display: none; background: #f8f9fa; border-left: 5px solid #3498db; padding: 20px; border-radius: 4px;">
+        <p id="responseText" style="margin: 0; white-space: pre-wrap;"></p>
+    </div>
+</div>
+<script>
+async function askAgent() {
+    const question = document.getElementById('userQuestion').value;
+    const btn = document.getElementById('askBtn');
+    const box = document.getElementById('answerBox'); // Get the hidden box
+    const text = document.getElementById('responseText');
+
+    if (!question) return;
+
+    // 1. Show "Searching..." state
+    btn.disabled = true;
+    btn.innerText = "Searching...";
+
+    // 2. Make the box visible immediately so the user knows something is happening
+    box.style.display = "block";
+    text.innerHTML = "<em>Analyzing your report and searching PubMed...</em>";
+
+    try {
+        const response = await fetch('/question/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({question: question})
+        });
+
+        const data = await response.json();
+        console.log("Response data:", data);
+
+        if (data.answer) {
+            // 3. Use marked.parse to render the Markdown (bolding, lists)
+            text.innerHTML = marked.parse(data.answer);
+        } else {
+            text.innerText = "The AI found an answer, but it was empty.";
+        }
+    } catch (e) {
+        console.error("Fetch error:", e);
+        text.innerText = "Sorry, I encountered an error researching that.";
+    } finally {
+        // 4. Reset button
+        btn.disabled = false;
+        btn.innerText = "Ask AI";
+    }
+}
+</script>
+    </div>
+</body>
+</html>
