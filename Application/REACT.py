@@ -7,5 +7,5 @@ react_router = APIRouter(tags=["Queries"], prefix="/question")
 async def ask_question(request:Request):
     data = await request.json()
     user_query = data.get("question")
-    answer = await Queries.ask_question(user_query)
-    return {"answer": answer}
+    result = await Queries.ask_question(user_query)
+    return {"answer": result.answer, "sources": [source.dict() for source in result.sources]}
