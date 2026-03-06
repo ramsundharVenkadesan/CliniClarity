@@ -9,9 +9,14 @@
         .header { border-bottom: 3px solid #3498db; margin-bottom: 30px; padding-bottom: 10px; }
         h1 { color: #2c3e50; font-size: 28px; margin: 0; }
         .content { color: #444; line-height: 1.8; }
-        /* Styling for the Markdown elements */
         .content h2 { color: #2980b9; border-left: 5px solid #2980b9; padding-left: 15px; margin-top: 40px; }
         .content strong { color: #e74c3c; }
+
+        /* New styling for Sources */
+        .source-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+        .source-card { text-decoration: none; color: #3498db; background: #f0f7ff; padding: 8px 15px; border: 1px solid #3498db; border-radius: 6px; font-size: 13px; font-weight: 500; transition: 0.2s; }
+        .source-card:hover { background: #3498db; color: white; }
+
         .footer-info { margin-top: 50px; font-size: 12px; color: #95a5a6; text-align: center; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -24,66 +29,90 @@
         <div class="content">
             {{ summary_html | safe }}
         </div>
+
         <div class="footer-info">
             Generated via CliniClarity AI | Chunks Analyzed: {{ chunks }} | Sources: {{ sources }}
         </div>
+
         <hr style="margin-top: 50px; border: 1px solid #eee;">
-<div class="chat-section">
-    <h3>🔍 Dive Deeper into this Report</h3>
-    <p style="color: #666; font-size: 14px;">Ask follow-up questions about your diagnosis, labs, or search PubMed for the latest research.</p>
 
-    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-        <input type="text" id="userQuestion" placeholder="e.g., What are the typical treatments for this mass?" style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
-        <button onclick="askAgent()" id="askBtn" style="background: #3498db; color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer;">Ask AI</button>
-    </div>
+        <div class="chat-section">
+            <h3>🔍 Dive Deeper into this Report</h3>
+            <p style="color: #666; font-size: 14px;">Ask follow-up questions about your diagnosis or search PubMed.</p>
 
-    <div id="answerBox" style="display: none; background: #f8f9fa; border-left: 5px solid #3498db; padding: 20px; border-radius: 4px;">
-        <p id="responseText" style="margin: 0; white-space: pre-wrap;"></p>
-    </div>
-</div>
-<script>
-async function askAgent() {
-    const question = document.getElementById('userQuestion').value;
-    const btn = document.getElementById('askBtn');
-    const box = document.getElementById('answerBox'); // Get the hidden box
-    const text = document.getElementById('responseText');
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <input type="text" id="userQuestion" placeholder="e.g., What are the typical treatments for this mass?" style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                <button onclick="askAgent()" id="askBtn" style="background: #3498db; color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer;">Ask AI</button>
+            </div>
 
-    if (!question) return;
+            <div id="answerBox" style="display: none; background: #f8f9fa; border-left: 5px solid #3498db; padding: 20px; border-radius: 4px;">
+                <div id="responseText" style="margin: 0;"></div>
 
-    // 1. Show "Searching..." state
-    btn.disabled = true;
-    btn.innerText = "Searching...";
+                <div id="sourceBox" style="display: none; border-top: 1px solid #ddd; margin-top: 20px; padding-top: 15px;">
+                    <span style="font-size: 12px; font-weight: bold; color: #7f8c8d; text-transform: uppercase;">External Sources:</span>
+                    <div id="sourceContainer" class="source-container"></div>
+                </div>
+            </div>
+        </div>
 
-    // 2. Make the box visible immediately so the user knows something is happening
-    box.style.display = "block";
-    text.innerHTML = "<em>Analyzing your report and searching PubMed...</em>";
+        <script>
+        async function askAgent() {
+            const question = document.getElementById('userQuestion').value;
+            const btn = document.getElementById('askBtn');
+            const box = document.getElementById('answerBox');
+            const text = document.getElementById('responseText');
+            const sourceBox = document.getElementById('sourceBox');
+            const sourceContainer = document.getElementById('sourceContainer');
 
-    try {
-        const response = await fetch('/question/', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({question: question})
-        });
+            if (!question) return;
 
-        const data = await response.json();
-        console.log("Response data:", data);
+            // Reset UI
+            btn.disabled = true;
+            btn.innerText = "Searching...";
+            box.style.display = "block";
+            sourceBox.style.display = "none";
+            sourceContainer.innerHTML = "";
+            text.innerHTML = "<em>Analyzing your report and searching PubMed...</em>";
 
-        if (data.answer) {
-            // 3. Use marked.parse to render the Markdown (bolding, lists)
-            text.innerHTML = marked.parse(data.answer);
-        } else {
-            text.innerText = "The AI found an answer, but it was empty.";
+            try {
+                const response = await fetch('/question/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({question: question})
+                });
+
+                const data = await response.json();
+
+                if (data.answer) {
+                    // Render the markdown response
+                    text.innerHTML = marked.parse(data.answer);
+
+                    // Filter only real URLs (ignore 'Patient Medical Report' text placeholders)
+                    const validSources = data.sources.filter(s => s.url && s.url.startsWith('http'));
+
+                    if (validSources.length > 0) {
+                        sourceBox.style.display = "block";
+                        validSources.forEach(source => {
+                            const card = document.createElement('a');
+                            card.href = source.url;
+                            card.target = "_blank";
+                            card.className = "source-card";
+                            card.innerText = `📄 ${source.title}`;
+                            sourceContainer.appendChild(card);
+                        });
+                    }
+                } else {
+                    text.innerText = "I researched the question, but could not formulate a clear answer.";
+                }
+            } catch (e) {
+                console.error("UI Error:", e);
+                text.innerText = "Sorry, I encountered an error. Please check your internet connection.";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Ask AI";
+            }
         }
-    } catch (e) {
-        console.error("Fetch error:", e);
-        text.innerText = "Sorry, I encountered an error researching that.";
-    } finally {
-        // 4. Reset button
-        btn.disabled = false;
-        btn.innerText = "Ask AI";
-    }
-}
-</script>
+        </script>
     </div>
 </body>
 </html>
