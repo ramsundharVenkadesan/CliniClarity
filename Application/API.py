@@ -3,7 +3,7 @@ from starlette.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from dotenv import load_dotenv
 load_dotenv()
-import REACT, RAG
+import RAG, REACT
 
 
 clini_clarity = FastAPI()
