@@ -27,11 +27,14 @@ async def summarize(state:GraphState) -> Dict[str, Any]:
 
         prompt_template = ChatPromptTemplate.from_template(template=Retrieval_Prompt.medical_summary_template).partial(system_prompt=system_prompt)
         retriever = vector_database.as_retriever(search_kwargs={"k": 5})
+        retrieved_docs = retriever.invoke(input="Summarize the report")
+        context_list = [doc.page_content for doc in retrieved_docs]
+        context_text = format_documents(retrieved_docs)
 
-        chain = (RunnablePassthrough.assign(context=itemgetter("query") | retriever | format_documents)
-                 | prompt_template | dynamic_model | StrOutputParser())
+        chain = prompt_template | dynamic_model | StrOutputParser()
 
-        response = await chain.ainvoke(input={"query": "Summarize the report"})
-        return {"summary": response}
+
+        response = await chain.ainvoke(input={"query": "Summarize the report", "context": context_text})
+        return {"summary": response, "context":context_list}
     else:
         raise Exception("Error: Something went wrong in the ingestion step!")

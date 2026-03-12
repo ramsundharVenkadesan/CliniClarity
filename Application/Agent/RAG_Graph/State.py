@@ -6,3 +6,5 @@ class GraphState(TypedDict):
     file_path:str
     documents: List[Document]
     status:bool
+    context:List[str]
+    evaluation_score:float
