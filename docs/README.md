@@ -107,21 +107,6 @@ Below is the architectural blueprint of CliniClarity, illustrating the flow from
    * **Infrastructure as Code:** Terraform (AWS VPC & EC2 orchestration)
    * **API Layer:** FastAPI with Asynchronous Server-Sent Events (SSE)
 
-Orchestration: LangGraph (State Machine logic) & LangChain (Tool binding)
-
-Reasoning Engine: Gemini 3 Flash (Native Tool Calling)
-
-Knowledge Retrieval: Tiered RAG (Internal Pinecone Vector Store + External PubMed MCP)
-
-Verification: DeepEval (Deterministic Hallucination & Faithfulness auditing)
-* **Language:** Python 3.13
-* **Orchestration:** LangGraph & LangChain
-* **LLM:** Gemini 3 Flash
-* **Database:** Pinecone (Vector Store)
-* **Security:** Microsoft Presidio (Local Redaction), ProtectAI (Injection Detection)
-* **Protocols:** Model Context Protocol (FastMCP)
-* **Infrastructure:** Terraform (AWS VPC, Private Instances)
-
 
 #### Security & HIPAA-First Data Pipeline
 To ensure sensitive data is never used to train public models, CliniClarity implements an automated redaction pipeline.
