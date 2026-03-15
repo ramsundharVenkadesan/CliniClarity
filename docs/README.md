@@ -73,7 +73,7 @@ CliniClarity provides an evidence-based pipeline where every response is mathema
     style AC fill:none,stroke:#64b5f6,stroke-dasharray: 5 5
     style VQ fill:none,stroke:#9575cd,stroke-dasharray: 5 5
 ```
-
+---
 
 #### 🚀 Key Technological Pillars
 Below is the architectural blueprint of CliniClarity, illustrating the flow from secure ingestion to verified synthesis.
@@ -91,6 +91,7 @@ Below is the architectural blueprint of CliniClarity, illustrating the flow from
 4. **Verification & QA: DeepEval**
    Every response undergoes an automated hallucination check. Using **DeepEval**, the system measures "Faithfulness" by comparing the generated answer against the retrieved document chunks, preventing the model from inventing clinical findings.
 
+---
 
 #### 🛠️ The Tech Stack
 1. **Core AI & Orchestration (Agentic RAG)**
@@ -107,6 +108,7 @@ Below is the architectural blueprint of CliniClarity, illustrating the flow from
    * **Infrastructure as Code:** Terraform (AWS VPC & EC2 orchestration)
    * **API Layer:** FastAPI with Asynchronous Server-Sent Events (SSE)
 
+---
 
 #### 🔒 Security & HIPAA-First Data Pipeline
 To ensure Protected Health Information (PHI) is never exposed to public models or unauthorized cloud logs, CliniClarity implements a "Local-First" automated redaction pipeline. This architecture satisfies HIPAA "Safe Harbor" standards by de-identifying data before it enters the RAG ecosystem.
@@ -119,6 +121,7 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 
 * **Immutable Redaction (PDF):** For document visualization, the system utilizes the ReportLab library to draw physical, non-recoverable black boxes over identified PHI coordinates, ensuring sensitive data cannot be recovered via text highlighting or metadata scraping.
 
+---
 
 #### 🚀 Key Strategic Benefits
 | Feature | Traditional LLMs / Search Engines | CliniClarity (Our Product) | PLM Strategic Value |
@@ -130,6 +133,7 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 | **Auditability** | Provides general advice without specific source links | Every response is cited with a specific DOI and evaluated via DeepEval | **Reliability:** Empowers patients with verifiable evidence for physician consultations. |
 | **Knowledge Retrieval** | Limited to the model's training cutoff date | Real-time Tiered Retrieval: Vector Store (Internal) + FastMCP (External) | **Efficiency:** Prioritizes specific patient context while augmenting with the latest medical research. |
 
+---
 
 ## 👥 The Team
 This product was developed by a cross-functional team with expertise across the full software lifecycle:
