@@ -74,21 +74,34 @@ CliniClarity provides an evidence-based pipeline where every response is mathema
     style VQ fill:none,stroke:#9575cd,stroke-dasharray: 5 5
 ```
 
+
 #### 🚀 Key Technological Pillars
 Below is the architectural blueprint of CliniClarity, illustrating the flow from secure ingestion to verified synthesis.
 1. **The Agentic Core: LangGraph & Native Tool Calling**
    We moved beyond linear chains to a State Machine architecture using LangGraph.
      *  **Deterministic Flow:** Each stage—from ingestion to synthesis—is a verifiable node in the graph.
      *  **Native Tool Calling:** Deprecated legacy ReAct text-parsing in favor of Native JSON Tool Calling, reducing hijacking risks and improving response latency.
-3. **Multi-Layered Guardrails (Adversarial Defense)**
+2. **Multi-Layered Guardrails (Adversarial Defense)**
    To ensure HIPAA-grade safety, the system implements a "Defense-in-Depth" strategy:
      * **Prompt Injection Defense:** Integrated a local Hugging Face SLM (ProtectAI DeBERTa) to block adversarial attacks before they reach the LLM.
      * **Semantic Routing:** Uses cosine similarity math to ensure the system strictly only processes clinical and biological queries.
-4. **FastMCP: Medical Knowledge Integration**
+3. **FastMCP: Medical Knowledge Integration**
    Utilizing the **Model Context Protocol (MCP)**, CliniClarity securely bridges the gap between patient data and external clinical literature.
      * **PubMed Server:** A standalone MCP server queries the National Library of Medicine directly, providing the agent with peer-reviewed verification of medical terms found in the user's report.
+4. **Verification & QA: DeepEval**
+   Every response undergoes an automated hallucination check. Using **DeepEval**, the system measures "Faithfulness" by comparing the generated answer against the retrieved document chunks, preventing the model from inventing clinical findings.
 
-* **Tech Stack**: Built using AWS Bedrock, OpenSearch Serverless, and Claude Sonnet/Nova Pro
+
+* **Tech Stack**:
+* **Language:** Python 3.13
+* **Orchestration:** LangGraph & LangChain
+* **LLM:** Gemini 3 Flash
+* **Database:** Pinecone (Vector Store)
+* **Security:** Microsoft Presidio (Local Redaction), ProtectAI (Injection Detection)
+* **Protocols:** Model Context Protocol (FastMCP)
+* **Infrastructure:** Terraform (AWS VPC, Private Instances)
+
+
 #### Security & HIPAA-First Data Pipeline
 To ensure sensitive data is never used to train public models, CliniClarity implements an automated redaction pipeline.
 * **PII/PHI Redaction:** A dedicated Lambda function matches PHI found by AWS Comprehend Medical to coordinates provided by AWS Textract
@@ -107,7 +120,7 @@ To ensure sensitive data is never used to train public models, CliniClarity impl
 This product was developed by a cross-functional team with expertise across the full software lifecycle:
 * **Bruno:** Containerization and Infrastructure
 * **Niall:** User research and HIPAA Compliance
-* **Greti:** Machine Learning, Testing and QA
+* **Greti:** Compliance Documentation
 * **Ramsundhar:** Cloud Architecture and Agentic AI
 
 ## Technical Appendix
