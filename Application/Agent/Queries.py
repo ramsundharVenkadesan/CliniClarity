@@ -1,11 +1,3 @@
-import ssl, certifi, os
-
-os.environ["SSL_CERT_FILE"] = certifi.where() # Set environment variable to use certifi certificates
-os.environ["REQUESTS_CA_BUNDLE"] = certifi.where() # Set environment variable to use certifi certificates
-ssl_context = ssl.create_default_context(cafile=certifi.where())
-
-
-from langchain_classic import hub
 from dotenv import load_dotenv
 from langchain_core.tools import create_retriever_tool
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
@@ -13,8 +5,12 @@ from langchain_pinecone import PineconeVectorStore
 from langchain_tavily import TavilySearch
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chat_models import init_chat_model
-from langchain_classic.agents import create_react_agent, AgentExecutor
+from langchain_classic.agents import AgentExecutor, create_tool_calling_agent
 from Agent.Prompts import Query_Prompt
+from mcp import StdioServerParameters, ClientSession
+from langchain_mcp_adapters.tools import load_mcp_tools
+from mcp.client.stdio import stdio_client
+import os
 
 load_dotenv()
 
@@ -27,7 +23,7 @@ retriever_tool = create_retriever_tool(retriever=retriever,
                                        description="Search for information within the patient's specific medical report. Use this first!")
 tavily_search = TavilySearch(max_results=3, include_domains=['pubmed.ncbi.nlm.nih.gov'])
 
-tools = [retriever_tool, tavily_search]
+
 
 
 custom_instructions = """You are a Compassionate Patient Advocate. 
@@ -35,38 +31,42 @@ Your final answer MUST be at a 6th-grade reading level.
 Explain complex medical terms simply. 
 """
 
+mcp_server_parameters = StdioServerParameters(command="/Users/ram/Downloads/CliniGraph/.venv/bin/python",
+                                              args=["/Users/ram/Downloads/CliniGraph/Servers/PubMed.py"])
+
 
 async def ask_question(query:str, model: str, provider: str):
-    prompt_template = ChatPromptTemplate.from_template(template=Query_Prompt.query_prompt).partial(tools=tools, system_prompt=custom_instructions)
-    dynamic_model = init_chat_model(model=model, model_provider=provider, temperature=0.0, streaming=True)
-    agent = create_react_agent(llm=dynamic_model, tools=tools, prompt=prompt_template)
-    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True, max_iterations=10)
+    async with stdio_client(mcp_server_parameters) as (read, write):
+        async with ClientSession(read_stream=read, write_stream=write) as session:
+            await session.initialize()
+            tools = await load_mcp_tools(session)
+            tools.append(retriever_tool)
 
+            prompt = ChatPromptTemplate.from_messages([
+                ("system", Query_Prompt.query_prompt.format(system_prompt=custom_instructions)),
+                ("human", "{input}"),
+                ('placeholder', "{agent_scratchpad}")
+            ])
+            dynamic_model = init_chat_model(model=model, model_provider=provider, temperature=0.0, streaming=True)
+            agent = create_tool_calling_agent(llm=dynamic_model, tools=tools, prompt=prompt)
+            agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True, max_iterations=10)
 
-    is_final_answer = False
-    buffer = ""
+            async for event in agent_executor.astream_events(input={"input": query}, version="v2"):
+                kind = event["event"]
 
-    async for event in agent_executor.astream_events(input={"input": query}, version="v2"):
-        kind = event["event"]
-        if kind == "on_chat_model_stream":
-            content = event["data"]["chunk"].content
+                # 2. We only care when the chat model is actively streaming tokens
+                if kind == "on_chat_model_stream":
+                    chunk = event["data"]["chunk"]
 
-            chunk_str = ""
-            if isinstance(content, str):
-                chunk_str = content
-            elif isinstance(content, list):
-                for item in content:
-                    if isinstance(item, dict) and "text" in item:
-                        chunk_str += item["text"]
-                    elif isinstance(item, str):
-                        chunk_str += item
-
-            if chunk_str:
-                if not is_final_answer:
-                    buffer += chunk_str
-                    if "Final Answer:" in buffer:
-                        is_final_answer = True
-                        text_to_yield = buffer.split("Final Answer:")[-1].lstrip()
-                        if text_to_yield: yield text_to_yield
-                else:
-                    yield chunk_str
+                    # 3. Native Tool Calling chunks might contain tool invocations OR text.
+                    # If the chunk has actual text content AND it is not trying to call a tool, yield it!
+                    if chunk.content and not getattr(chunk, "tool_calls", None):
+                        # In LangChain v0.2+, chunk.content might be a string or a list of dicts
+                        if isinstance(chunk.content, str):
+                            yield chunk.content
+                        elif isinstance(chunk.content, list):
+                            for item in chunk.content:
+                                if isinstance(item, dict) and "text" in item:
+                                    yield item["text"]
+                                elif isinstance(item, str):
+                                    yield item
