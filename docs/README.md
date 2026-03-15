@@ -136,11 +136,11 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 ---
 
 ## Cloud Architecture
-<pre>
+```mermaid
 flowchart TD
     %% 1. USER INTERFACE
-    U((Patient / User)):::userNode --&gt;|Step 1: Upload| ALB
-    U --&gt;|Step 2: Query| ALB
+    U((Patient / User)):::userNode -->|1: PDF Upload| ALB
+    U -->|2: Query| ALB
 
     %% 2. PUBLIC TIER
     subgraph DMZ [PUBLIC SUBNET - DMZ]
@@ -168,17 +168,17 @@ flowchart TD
     GEMINI{Gemini 3 Flash}:::external
     PUB([PubMed MCP]):::external
 
-    %% Routing Connections
-    ALB --&gt;|Inbound Traffic| ASG
-    ASG --&gt;|Manages| EC2_A
-    ASG --&gt;|Manages| EC2_B
-    ASG --&gt;|Manages| EC2_C
+    %% Routing
+    ALB -->|Inbound Traffic| ASG
+    ASG -->|Manages| EC2_A
+    ASG -->|Manages| EC2_B
+    ASG -->|Manages| EC2_C
 
-    COMPUTE &lt;--&gt;|RAG Lookup| VDB
-    COMPUTE --&gt;|Secure Egress| NAT
+    COMPUTE <-->|RAG Lookup| VDB
+    COMPUTE -->|Secure Egress| NAT
     
-    NAT --&gt;|API Calls| GEMINI
-    NAT --&gt;|API Calls| PUB
+    NAT -->|API Calls| GEMINI
+    NAT -->|API Calls| PUB
 
     %% Styling for Dark Mode Visibility
     classDef userNode fill:#ffffff,stroke:#000,stroke-width:2px,color:#000
@@ -191,7 +191,7 @@ flowchart TD
     style DMZ fill:none,stroke:#d4a017,stroke-width:2px,stroke-dasharray: 5 5
     style HIPAA fill:none,stroke:#007bff,stroke-width:2px,stroke-dasharray: 5 5
     style COMPUTE fill:none,stroke:#333,stroke-width:1px,stroke-dasharray: 3 3
-</pre>
+```
 
 ## 👥 The Team
 This product was developed by a cross-functional team with expertise across the full software lifecycle:
