@@ -136,7 +136,7 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 ---
 
 ## Cloud Architecture
-```mermaid
+<pre>
 flowchart TD
     %% 1. USER INTERFACE
     U((Patient / User)):::userNode --&gt;|Step 1: Upload| ALB
@@ -191,7 +191,7 @@ flowchart TD
     style DMZ fill:none,stroke:#d4a017,stroke-width:2px,stroke-dasharray: 5 5
     style HIPAA fill:none,stroke:#007bff,stroke-width:2px,stroke-dasharray: 5 5
     style COMPUTE fill:none,stroke:#333,stroke-width:1px,stroke-dasharray: 3 3
-```
+</pre>
 
 ## 👥 The Team
 This product was developed by a cross-functional team with expertise across the full software lifecycle:
