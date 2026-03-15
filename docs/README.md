@@ -135,6 +135,76 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 
 ---
 
+## Cloud Architecture
+```mermaid
+flowchart TD
+    %% Global Styling for Dark Mode Compatibility
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:1px,color:#000;
+    classDef internet fill:#ffffff,stroke:#000,stroke-width:2px,color:#000;
+    classDef public fill:#fffbe6,stroke:#d4a017,stroke-width:2px,color:#000;
+    classDef private fill:#f0f7ff,stroke:#007bff,stroke-width:2px,color:#000;
+    classDef security fill:#fff5f5,stroke:#c0392b,stroke-width:2px,color:#c0392b;
+    classDef agentNode fill:#ffffff,stroke:#007bff,stroke-width:1.5px,color:#000;
+    classDef toolNode fill:#fafffa,stroke:#27ae60,stroke-width:1.5px,color:#1e8449;
+
+    %% 1. ENTRY POINTS
+    User((Patient/User)):::internet --&gt;|1: PDF Upload| API_Sum[FastAPI: /summary]:::public
+    User --&gt;|2: Ask Question| API_Que[FastAPI: /question]:::public
+
+    subgraph DMZ [🌐 PUBLIC SUBNET - DMZ]
+        API_Sum
+        API_Que
+        NAT[NAT Gateway]:::public
+    end
+
+    subgraph HIPAA [🔐 PRIVATE SUBNET - SECURE ZONE]
+        direction TB
+        subgraph ASG [Auto Scaling Group]
+            subgraph Node [EC2: CliniClarity Agent]
+                
+                subgraph Ingestion [📂 SECURE INGESTION]
+                    PDF[PDF Parser] --&gt; Presidio[Microsoft Presidio: Local Redaction]:::security
+                    Presidio --&gt; Embed[Gemini Embedding]
+                end
+
+                subgraph Defense [🛡️ ADVERSARIAL DEFENSE]
+                    PI[ProtectAI: Injection Scan]:::security
+                    MI[Semantic: Intent Router]:::security
+                end
+
+                subgraph Reasoning [🧠 LANGGRAPH CORE]
+                    LG[LangGraph Controller]:::agentNode
+                    PubMed[MCP: PubMed Tool]:::toolNode
+                    VectorDB[(Pinecone DB)]:::toolNode
+                end
+
+                subgraph QA [✅ OUTPUT AUDIT]
+                    DE[DeepEval: Hallucination Check]:::agentNode
+                end
+            end
+        end
+    end
+
+    %% Routing Logic
+    API_Sum --&gt; PDF
+    Embed --&gt; VectorDB
+    
+    API_Que --&gt; PI
+    PI --&gt;|Pass| MI
+    MI --&gt;|Pass| LG
+    
+    LG &lt;--&gt; VectorDB
+    LG &lt;--&gt; PubMed
+    LG --&gt; DE
+    DE --&gt;|Verified| User
+    DE --&gt;|Fail| LG
+
+    %% Header Styles for Containers
+    style DMZ fill:none,stroke:#d4a017,stroke-width:3px,stroke-dasharray: 5 5
+    style HIPAA fill:none,stroke:#007bff,stroke-width:3px,stroke-dasharray: 5 5
+    style ASG fill:none,stroke:#333,stroke-width:2px,stroke-dasharray: 2 2
+```
+
 ## 👥 The Team
 This product was developed by a cross-functional team with expertise across the full software lifecycle:
 * **Bruno:** Containerization and Infrastructure
