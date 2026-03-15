@@ -143,7 +143,7 @@ flowchart TD
     U -->|Step 2: Query| ALB
 
     %% 2. VPC CONTAINER
-    subgraph VPC [AWS VPC]
+    subgraph VPC [AWS VPC - 10.0.0.0/16]
         
         %% 3. PUBLIC TIER
         subgraph PublicSubnet [PUBLIC SUBNET - DMZ]
@@ -156,11 +156,14 @@ flowchart TD
         subgraph PrivateSubnet [PRIVATE SUBNET - HIPAA ZONE]
             direction TB
             
-            subgraph ASG [Auto Scaling Group: CliniClarity Node Cluster]
+            %% ASG Icon as a distinct node
+            ASG{AUTO SCALING GROUP}:::asg
+            
+            subgraph COMPUTE [Agent Node Cluster]
                 direction LR
-                EC2_A[[EC2 Agent Node A]]:::instance
-                EC2_B[[EC2 Agent Node B]]:::instance
-                EC2_C[[EC2 Agent Node C]]:::instance
+                EC2_A[[EC2 Node A]]:::instance
+                EC2_B[[EC2 Node B]]:::instance
+                EC2_C[[EC2 Node C]]:::instance
             end
 
             VDB[(Pinecone Vector DB)]:::database
@@ -168,26 +171,29 @@ flowchart TD
     end
 
     %% 5. EXTERNAL SERVICES
-    NAT -->|Secure API Calls| GEMINI{Gemini 3 Flash}
-    NAT -->|Secure API Calls| PUB([PubMed MCP Server])
+    NAT -->|Secure Egress| GEMINI{Gemini 3 Flash}:::external
+    NAT -->|Secure Egress| PUB([PubMed MCP Server]):::external
 
-    %% Inter-Tier Connections
-    ALB -->|Inbound Traffic| ASG
-    ASG <--> VDB
-    ASG -->|Egress via NAT| NAT
+    %% Connectivity
+    ALB --> ASG
+    ASG --> COMPUTE
+    COMPUTE <--> VDB
+    COMPUTE --> NAT
 
-    %% Dark-Mode Optimized High-Contrast Styling
-    %% These classes guarantee black text on a white box with colored borders
-    classDef userNode fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000;
-    classDef resource fill:#ffffff,stroke:#007bff,stroke-width:2px,color:#000000;
-    classDef instance fill:#ffffff,stroke:#007bff,stroke-width:1.5px,color:#000000;
-    classDef database fill:#ffffff,stroke:#28a745,stroke-width:2px,color:#000000;
+    %% DARK MODE FIX: Hardcoded Hex Colors
+    %% Forces Black Text (#000000) on White Background (#FFFFFF)
+    classDef userNode fill:#FFFFFF,stroke:#000000,stroke-width:2px,color:#000000;
+    classDef resource fill:#FFFFFF,stroke:#D4A017,stroke-width:2px,color:#000000;
+    classDef instance fill:#FFFFFF,stroke:#007BFF,stroke-width:2px,color:#000000;
+    classDef database fill:#FFFFFF,stroke:#28A745,stroke-width:2px,color:#000000;
+    classDef asg fill:#F0F7FF,stroke:#007BFF,stroke-width:2px,color:#000000;
+    classDef external fill:#FFFFFF,stroke:#333333,stroke-width:2px,color:#000000;
 
-    %% Subnet & VPC Styles (No Fill, Bold Dashed Borders)
-    style VPC fill:none,stroke:#333333,stroke-width:3px;
-    style PublicSubnet fill:none,stroke:#ffc107,stroke-width:2.5px,stroke-dasharray: 5 5;
-    style PrivateSubnet fill:none,stroke:#007bff,stroke-width:2.5px,stroke-dasharray: 5 5;
-    style ASG fill:none,stroke:#333333,stroke-width:1px,stroke-dasharray: 3 3;
+    %% Subnet Styling
+    style VPC fill:none,stroke:#333333,stroke-width:4px,color:#333333
+    style PublicSubnet fill:none,stroke:#D4A017,stroke-width:2px,stroke-dasharray: 5 5,color:#D4A017
+    style PrivateSubnet fill:none,stroke:#007BFF,stroke-width:2px,stroke-dasharray: 5 5,color:#007BFF
+    style COMPUTE fill:none,stroke:#333333,stroke-width:1px,stroke-dasharray: 3 3
 ```
 
 ## 👥 The Team
