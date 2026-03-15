@@ -139,49 +139,60 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 ```mermaid
 flowchart TD
     %% 1. USER ACCESS
-    U((User/Patient)) -->|Step 1: Upload| ALB[Application Load Balancer]
+    U((User / Patient)) -->|Step 1: Upload| ALB[Application Load Balancer]
     U -->|Step 2: Query| ALB
 
     %% 2. PUBLIC TIER
-    subgraph DMZ [🌐 PUBLIC SUBNET]
+    subgraph DMZ [PUBLIC SUBNET]
         ALB
         NAT[NAT Gateway]
     end
 
     %% 3. PRIVATE TIER
-    subgraph PRIVATE [🔐 PRIVATE SUBNET - HIPAA ZONE]
+    subgraph PRIVATE [PRIVATE SUBNET - HIPAA ZONE]
         direction TB
         
-        subgraph ASG [Auto Scaling Group: Dynamic Capacity]
+        subgraph ASG [Auto Scaling Group - Dynamic Capacity]
             direction LR
-            EC2_A[[EC2: Agent Node A]]
-            EC2_B[[EC2: Agent Node B]]
-            EC2_C[[EC2: Agent Node C]]
+            EC2_A[[EC2 Agent Node A]]
+            EC2_B[[EC2 Agent Node B]]
+            EC2_C[[EC2 Agent Node C]]
         end
 
-        subgraph DATA [🗄️ INTERNAL DATA]
+        subgraph DATA [Internal Data]
             VDB[(Pinecone Vector DB)]
         end
     end
 
-    %% 4. EXTERNAL EGRESS
-    NAT -->|Secure API Calls| GEMINI{Gemini 3 Flash}
-    NAT -->|Secure API Calls| PUB([PubMed MCP])
+    %% 4. EXTERNAL SERVICES
+    GEMINI{Gemini 3 Flash}
+    PUB([PubMed MCP])
 
     %% Routing
-    ALB -->|Traffic Routing| ASG
-    ASG &lt;-->; VDB
-    ASG -->|Egress via NAT| NAT
+    ALB -->|Traffic Routing| EC2_A
+    ALB --> EC2_B
+    ALB --> EC2_C
 
-    %% Dark Mode Optimized Styling
-    style DMZ fill:none,stroke:#d4a017,stroke-width:2px,stroke-dasharray: 5 5
-    style PRIVATE fill:none,stroke:#007bff,stroke-width:2px,stroke-dasharray: 5 5
-    style ASG fill:none,stroke:#333,stroke-width:2px,stroke-dasharray: 2 2
-    style EC2_A fill:#f0f7ff,stroke:#007bff,stroke-width:1.5px,color:#000
-    style EC2_B fill:#f0f7ff,stroke:#007bff,stroke-width:1.5px,color:#000
-    style EC2_C fill:#f0f7ff,stroke:#007bff,stroke-width:1.5px,color:#000
-    style VDB fill:#fafffa,stroke:#27ae60,stroke-width:2px,color:#000
-    style ALB fill:#ffffff,stroke:#007bff,stroke-width:2px,color:#000
+    EC2_A <--> VDB
+    EC2_B <--> VDB
+    EC2_C <--> VDB
+
+    EC2_A -->|Egress via NAT| NAT
+    EC2_B --> NAT
+    EC2_C --> NAT
+
+    NAT -->|Secure API Calls| GEMINI
+    NAT -->|Secure API Calls| PUB
+
+    %% Styling
+    style DMZ fill:none,stroke:#d4a017,stroke-width:2px,stroke-dasharray:5 5
+    style PRIVATE fill:none,stroke:#007bff,stroke-width:2px,stroke-dasharray:5 5
+    style ASG fill:none,stroke:#333,stroke-width:2px,stroke-dasharray:2 2
+    style EC2_A fill:#f0f7ff,stroke:#007bff,stroke-width:1.5px
+    style EC2_B fill:#f0f7ff,stroke:#007bff,stroke-width:1.5px
+    style EC2_C fill:#f0f7ff,stroke:#007bff,stroke-width:1.5px
+    style VDB fill:#fafffa,stroke:#27ae60,stroke-width:2px
+    style ALB fill:#ffffff,stroke:#007bff,stroke-width:2px
 ```
 
 ## 👥 The Team
