@@ -143,19 +143,31 @@ This product was developed by a cross-functional team with expertise across the 
 * **Ramsundhar:** Cloud Architecture and Agentic AI
 
 ## Technical Appendix
-#### Orchestration: LangChain & Agentic Logic
-To manage the complex ReAct (Reasoning and Acting) loop, we utilize LangChain as the core orchestration framework. This allows us to move beyond simple chat interfaces into autonomous problem-solving.
-* **State Management:** LangChain manages the conversational memory and the "state" of the research assistant, ensuring that follow-up questions maintain the context of the initial medical report.
-* **Tool Binding:** We use LangChain to bind the Tavily Search API and PubMed as executable tools that the LLM can "decide" to call when internal context from the vector store is insufficient.
-* **Prompt Engineering:** LangChain templates are used to enforce the Thinking -> Action -> Observation cycle, preventing the model from providing unverified medical advice by strictly defining its persona as a "Research Librarian".
-#### Infrastructure as Code (IaC): Terraform
-To ensure the product can be deployed reliably across different environments (Dev, QA, Production), the entire AWS architecture is managed via Terraform.
-* **Reproducibility:** Every component—from S3 buckets and Lambda functions to OpenSearch Serverless collections—is defined in declarative .tf files.
-* **Security Configuration:** Terraform is used to manage strict IAM roles and policies, ensuring the "Principle of Least Privilege" is applied to the data redaction pipeline.
-* **Scalability:** By using Terraform modules, we can quickly scale the Bedrock Knowledge Bases and vector indices as the volume of processed medical documents grows.
-#### Core AWS Services
-* **AWS Bedrock:** Provides access to high-performance models like Claude Sonnet and Nova Pro via a serverless API, reducing the overhead of managing specialized AI hardware.
-* **OpenSearch Serverless:** Serves as our vector database, storing embeddings of patient reports for sub-second retrieval during the RAG phase.
-* **Lambda & S3 Event Notifications:** Automates the lifecycle of a document; the moment a PDF hits the `/INPUT` bucket, a Lambda triggers the redaction and subsequent ingestion jobs.
-* **Comprehend Medical:** An NLP service specifically tuned to detect Protected Health Information (PHI) within clinical text, forming the backbone of our HIPAA compliance strategy.
+
+### Orchestration: LangChain & Agentic Logic
+To manage the complex clinical reasoning required for healthcare, CliniClarity utilizes **LangGraph** as its core orchestration framework. This allows the system to move beyond linear chains into a robust, cyclic state machine.
+* **State Management:** Every interaction is managed as a discrete state within the graph. This ensures that the context from the initial PDF ingestion remains persistent and immutable throughout the follow-up research phase.
+* **Self-Correction Loop:** The graph includes conditional edges that route responses through a DeepEval node. If the "Faithfulness" score falls below a specific threshold, the state is routed back to the reasoning engine for refinement, preventing hallucinations before they reach the UI.
+* **Native Tool Calling:** Unlike traditional ReAct loops that parse raw text, we utilize Native JSON Tool Calling. This forces the model to interact with external systems (like PubMed) using strictly typed schemas, significantly reducing the risk of tool-hijacking and parsing errors.
+
+---
+
+### Infrastructure as Code (IaC): Terraform
+To ensure the product can be deployed reliably across different environments (Dev, QA, Production), the entire AWS architecture is managed via **Terraform.**
+* **Hardened Network Architecture:** Terraform defines a multi-tier VPC with strictly isolated private subnets. This ensures that the reasoning agent and sensitive ingestion nodes have zero public ingress, effectively creating a "walled garden" for patient data.
+* **Resource Reproducibility:** Every component—from the Pinecone vector indices to the compute instances running the FastMCP server—is defined in declarative `.tf` files, allowing for rapid, audited deployments across staging and production environments.
+* **Least Privilege IAM:** Access to the Gemini API and vector store is managed through scoped IAM roles, ensuring that each node in the graph only has the specific permissions required for its task.
+
+---
+  
+## Core System Components
+* **Gemini 3 Flash:** Serves as the high-speed reasoning engine, selected for its massive context window and native support for asynchronous tool calling.
+
+* **FastMCP (Model Context Protocol):** Orchestrates the connection between the LLM and the National Library of Medicine. By running PubMed as a standalone MCP server, we decouple the knowledge retrieval logic from the core application.
+
+* **Microsoft Presidio:** A localized PII/PHI redaction engine that identifies and scrubs 18+ types of sensitive identifiers at the point of ingestion, ensuring HIPAA "Safe Harbor" compliance without sending raw data to the cloud.
+
+* **Pinecone:** A high-performance vector database that stores the anonymized embeddings of clinical reports, enabling sub-second Retrieval-Augmented Generation (RAG).
+
+* **DeepEval:** A specialized testing framework used to objectively audit the agent's output. It acts as the final "clinical auditor," measuring the factual alignment between the generated summary and the source medical records.
 
