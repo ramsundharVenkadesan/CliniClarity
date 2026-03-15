@@ -138,61 +138,59 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 ## Cloud Architecture
 ```mermaid
 flowchart TD
-    %% 1. USER ACCESS
-    U((User / Patient)) -->|Step 1: Upload| ALB[Application Load Balancer]
-    U -->|Step 2: Query| ALB
+    %% 1. USER INTERFACE
+    U((Patient / User)):::userNode --&gt;|Step 1: Upload| ALB
+    U --&gt;|Step 2: Query| ALB
 
     %% 2. PUBLIC TIER
-    subgraph DMZ [PUBLIC SUBNET]
-        ALB
-        NAT[NAT Gateway]
+    subgraph DMZ [PUBLIC SUBNET - DMZ]
+        ALB[Application Load Balancer]:::resource
+        NAT[NAT Gateway]:::resource
     end
 
     %% 3. PRIVATE TIER
-    subgraph PRIVATE [PRIVATE SUBNET - HIPAA ZONE]
+    subgraph HIPAA [PRIVATE SUBNET - HIPAA ZONE]
         direction TB
         
-        subgraph ASG [Auto Scaling Group - Dynamic Capacity]
+        ASG{Auto Scaling Group}:::asg
+        
+        subgraph COMPUTE [Agentic Compute Cluster]
             direction LR
-            EC2_A[[EC2 Agent Node A]]
-            EC2_B[[EC2 Agent Node B]]
-            EC2_C[[EC2 Agent Node C]]
+            EC2_A[[EC2 Agent Node A]]:::instance
+            EC2_B[[EC2 Agent Node B]]:::instance
+            EC2_C[[EC2 Agent Node C]]:::instance
         end
 
-        subgraph DATA [Internal Data]
-            VDB[(Pinecone Vector DB)]
-        end
+        VDB[(Pinecone Vector DB)]:::database
     end
 
     %% 4. EXTERNAL SERVICES
-    GEMINI{Gemini 3 Flash}
-    PUB([PubMed MCP])
+    GEMINI{Gemini 3 Flash}:::external
+    PUB([PubMed MCP]):::external
 
-    %% Routing
-    ALB -->|Traffic Routing| EC2_A
-    ALB --> EC2_B
-    ALB --> EC2_C
+    %% Routing Connections
+    ALB --&gt;|Inbound Traffic| ASG
+    ASG --&gt;|Manages| EC2_A
+    ASG --&gt;|Manages| EC2_B
+    ASG --&gt;|Manages| EC2_C
 
-    EC2_A <--> VDB
-    EC2_B <--> VDB
-    EC2_C <--> VDB
+    COMPUTE &lt;--&gt;|RAG Lookup| VDB
+    COMPUTE --&gt;|Secure Egress| NAT
+    
+    NAT --&gt;|API Calls| GEMINI
+    NAT --&gt;|API Calls| PUB
 
-    EC2_A -->|Egress via NAT| NAT
-    EC2_B --> NAT
-    EC2_C --> NAT
+    %% Styling for Dark Mode Visibility
+    classDef userNode fill:#ffffff,stroke:#000,stroke-width:2px,color:#000
+    classDef resource fill:#ffffff,stroke:#d4a017,stroke-width:2px,color:#000
+    classDef asg fill:#f0f7ff,stroke:#007bff,stroke-width:2px,color:#000
+    classDef instance fill:#ffffff,stroke:#007bff,stroke-width:1.5px,color:#000
+    classDef database fill:#fafffa,stroke:#27ae60,stroke-width:2px,color:#000
+    classDef external fill:#ffffff,stroke:#333,stroke-width:2px,color:#000
 
-    NAT -->|Secure API Calls| GEMINI
-    NAT -->|Secure API Calls| PUB
-
-    %% Styling
-    style DMZ fill:none,stroke:#d4a017,stroke-width:2px,stroke-dasharray:5 5
-    style PRIVATE fill:none,stroke:#007bff,stroke-width:2px,stroke-dasharray:5 5
-    style ASG fill:none,stroke:#333,stroke-width:2px,stroke-dasharray:2 2
-    style EC2_A fill:#f0f7ff,stroke:#007bff,stroke-width:1.5px
-    style EC2_B fill:#f0f7ff,stroke:#007bff,stroke-width:1.5px
-    style EC2_C fill:#f0f7ff,stroke:#007bff,stroke-width:1.5px
-    style VDB fill:#fafffa,stroke:#27ae60,stroke-width:2px
-    style ALB fill:#ffffff,stroke:#007bff,stroke-width:2px
+    style DMZ fill:none,stroke:#d4a017,stroke-width:2px,stroke-dasharray: 5 5
+    style HIPAA fill:none,stroke:#007bff,stroke-width:2px,stroke-dasharray: 5 5
+    style COMPUTE fill:none,stroke:#333,stroke-width:1px,stroke-dasharray: 3 3
 ```
 
 ## 👥 The Team
