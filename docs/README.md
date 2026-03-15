@@ -138,27 +138,27 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 ## Cloud Architecture
 ```mermaid
 flowchart TD
-    %% 1. ENTRY VECTORS
-    U((Patient/User)) --&gt;|1: PDF Upload| SUM[/FastAPI: /summary/]
-    U --&gt;|2: Ask Question| QUE[/FastAPI: /question/]
+    %% 1. INPUT VECTORS
+    User((User/Patient)) --&gt;|1: PDF Upload| S[/FastAPI: /summary/]
+    User --&gt;|2: Ask Question| Q[/FastAPI: /question/]
 
     subgraph DMZ [🌐 PUBLIC SUBNET - DMZ]
-        SUM
-        QUE
+        S
+        Q
         NAT[NAT Gateway]
     end
 
     subgraph SECURE [🔐 PRIVATE SUBNET - HIPAA ZONE]
         direction TB
         subgraph ASG [Auto Scaling Group]
-            subgraph NODE [EC2: CliniClarity Agent]
+            subgraph NODE [EC2 Instance]
                 
                 subgraph INGEST [📂 SECURE INGESTION]
                     PDF[PDF Parser] --&gt; PRE[Microsoft Presidio]
                     PRE --&gt; EMB[Gemini Embedding]
                 end
 
-                subgraph GUARD [🛡️ ADVERSARIAL DEFENSE]
+                subgraph DEFENSE [🛡️ ADVERSARIAL DEFENSE]
                     PI[ProtectAI Scan]
                     MI[Semantic Router]
                 end
@@ -176,28 +176,28 @@ flowchart TD
         end
     end
 
-    %% Routing Logic
-    SUM --&gt; PDF
+    %% Logic Routing
+    S --&gt; PDF
     EMB --&gt; DB
-    QUE --&gt; PI
+    Q --&gt; PI
     PI --&gt;|Pass| MI
     MI --&gt;|Pass| LG
     LG &lt;--&gt; DB
     LG &lt;--&gt; PUB
     LG --&gt; DE
-    DE --&gt;|Verified| U
+    DE --&gt;|Verified| User
     DE --&gt;|Fail| LG
 
-    %% Dark-Mode Optimized Styling
+    %% Style Overrides for Dark/Light Mode Visibility
     style DMZ fill:none,stroke:#d4a017,stroke-width:2px,stroke-dasharray: 5 5
     style SECURE fill:none,stroke:#007bff,stroke-width:2px,stroke-dasharray: 5 5
-    style PRE fill:#fff5f5,stroke:#c0392b,stroke-width:2px
-    style PI fill:#fff5f5,stroke:#c0392b,stroke-width:2px
-    style MI fill:#fff5f5,stroke:#c0392b,stroke-width:2px
-    style LG fill:#f0f7ff,stroke:#007bff,stroke-width:2px
-    style PUB fill:#fafffa,stroke:#27ae60,stroke-width:2px
-    style DB fill:#fafffa,stroke:#27ae60,stroke-width:2px
-    style DE fill:#f3e5f5,stroke:#9b59b6,stroke-width:2px
+    style PRE fill:#fff5f5,stroke:#c0392b,stroke-width:2px,color:#000
+    style PI fill:#fff5f5,stroke:#c0392b,stroke-width:2px,color:#000
+    style MI fill:#fff5f5,stroke:#c0392b,stroke-width:2px,color:#000
+    style LG fill:#f0f7ff,stroke:#007bff,stroke-width:2px,color:#000
+    style PUB fill:#fafffa,stroke:#27ae60,stroke-width:2px,color:#000
+    style DB fill:#fafffa,stroke:#27ae60,stroke-width:2px,color:#000
+    style DE fill:#f3e5f5,stroke:#9b59b6,stroke-width:2px,color:#000
 ```
 
 ## 👥 The Team
