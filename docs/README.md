@@ -137,63 +137,73 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 
 ## Cloud Architecture
 ```mermaid
-flowchart TD
-    %% 1. USER ACCESS
-    U((Patient / User)):::userNode -->|Step 1: Upload| ALB[Application Load Balancer]
-    U -->|Step 2: Query| ALB
+flowchart LR
 
-    %% 2. VPC CONTAINER
-    subgraph VPC [AWS VPC - 10.0.0.0/16]
-        
-        %% 3. PUBLIC TIER
-        subgraph PublicSubnet [PUBLIC SUBNET - DMZ]
-            direction TB
-            ALB:::resource
-            NAT[NAT Gateway]:::resource
-        end
+%% USER
+U((Patient / User)):::userNode
 
-        %% 4. PRIVATE TIER
-        subgraph PrivateSubnet [PRIVATE SUBNET - HIPAA ZONE]
-            direction TB
-            
-            %% ASG Icon as a distinct node
-            ASG{AUTO SCALING GROUP}:::asg
-            
-            subgraph COMPUTE [Agent Node Cluster]
-                direction LR
-                EC2_A[[EC2 Node A]]:::instance
-                EC2_B[[EC2 Node B]]:::instance
-                EC2_C[[EC2 Node C]]:::instance
-            end
+%% VPC
+subgraph VPC [AWS VPC]
 
-            VDB[(Pinecone Vector DB)]:::database
-        end
+    %% PUBLIC SUBNET
+    subgraph PublicSubnet [PUBLIC SUBNET - DMZ]
+        direction TB
+        ALB[Application Load Balancer]:::resource
+        NAT[NAT Gateway]:::resource
     end
 
-    %% 5. EXTERNAL SERVICES
-    NAT -->|Secure Egress| GEMINI{Gemini 3 Flash}:::external
-    NAT -->|Secure Egress| PUB([PubMed MCP Server]):::external
+    %% PRIVATE SUBNET
+    subgraph PrivateSubnet [PRIVATE SUBNET - HIPAA ZONE]
+        direction TB
+        
+        subgraph ASG [Auto Scaling Group - CliniClarity Node Cluster]
+            direction TB
+            EC2_A[[EC2 Agent Node A]]:::instance
+            EC2_B[[EC2 Agent Node B]]:::instance
+            EC2_C[[EC2 Agent Node C]]:::instance
+        end
 
-    %% Connectivity
-    ALB --> ASG
-    ASG --> COMPUTE
-    COMPUTE <--> VDB
-    COMPUTE --> NAT
+        VDB[(Pinecone Vector DB)]:::database
+    end
+end
 
-    %% DARK MODE FIX: Hardcoded Hex Colors
-    %% Forces Black Text (#000000) on White Background (#FFFFFF)
-    classDef userNode fill:#FFFFFF,stroke:#000000,stroke-width:2px,color:#000000;
-    classDef resource fill:#FFFFFF,stroke:#D4A017,stroke-width:2px,color:#000000;
-    classDef instance fill:#FFFFFF,stroke:#007BFF,stroke-width:2px,color:#000000;
-    classDef database fill:#FFFFFF,stroke:#28A745,stroke-width:2px,color:#000000;
-    classDef asg fill:#F0F7FF,stroke:#007BFF,stroke-width:2px,color:#000000;
-    classDef external fill:#FFFFFF,stroke:#333333,stroke-width:2px,color:#000000;
+%% EXTERNAL SERVICES
+GEMINI{Gemini 3 Flash}
+PUB([PubMed MCP Server])
 
-    %% Subnet Styling
-    style VPC fill:none,stroke:#333333,stroke-width:4px,color:#333333
-    style PublicSubnet fill:none,stroke:#D4A017,stroke-width:2px,stroke-dasharray: 5 5,color:#D4A017
-    style PrivateSubnet fill:none,stroke:#007BFF,stroke-width:2px,stroke-dasharray: 5 5,color:#007BFF
-    style COMPUTE fill:none,stroke:#333333,stroke-width:1px,stroke-dasharray: 3 3
+%% USER FLOW
+U -->|Step 1: Upload| ALB
+U -->|Step 2: Query| ALB
+
+%% TRAFFIC ROUTING
+ALB -->|Inbound Traffic| EC2_A
+ALB --> EC2_B
+ALB --> EC2_C
+
+%% VECTOR DATABASE
+EC2_A <--> VDB
+EC2_B <--> VDB
+EC2_C <--> VDB
+
+%% NAT EGRESS
+EC2_A -->|Egress via NAT| NAT
+EC2_B --> NAT
+EC2_C --> NAT
+
+%% EXTERNAL API CALLS
+NAT -->|Secure API Calls| GEMINI
+NAT -->|Secure API Calls| PUB
+
+%% STYLING
+classDef userNode fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000;
+classDef resource fill:#ffffff,stroke:#007bff,stroke-width:2px,color:#000000;
+classDef instance fill:#ffffff,stroke:#007bff,stroke-width:1.5px,color:#000000;
+classDef database fill:#ffffff,stroke:#28a745,stroke-width:2px,color:#000000;
+
+style VPC fill:none,stroke:#333333,stroke-width:3px
+style PublicSubnet fill:none,stroke:#ffc107,stroke-width:2.5px,stroke-dasharray:5 5
+style PrivateSubnet fill:none,stroke:#007bff,stroke-width:2.5px,stroke-dasharray:5 5
+style ASG fill:none,stroke:#333333,stroke-width:1px,stroke-dasharray:3 3
 ```
 
 ## 👥 The Team
