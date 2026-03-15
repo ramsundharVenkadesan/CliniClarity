@@ -209,7 +209,7 @@ style ASG fill:none,stroke:#333333,stroke-width:1px,stroke-dasharray:3 3
 ```
 
 
-## 🔒 Security & HIPAA-First Data Pipeline
+## 🔒 Security & HIPAA-First Standards
 To ensure Protected Health Information (PHI) is never exposed to public models or unauthorized cloud logs, CliniClarity implements a "Local-First" automated redaction pipeline. This architecture satisfies HIPAA "Safe Harbor" standards by de-identifying data before it enters the RAG ecosystem.
 
 * **Deterministic PII/PHI Redaction:** Instead of relying on cloud-based NLP, CliniClarity utilizes a local instance of Microsoft Presidio. This engine performs Named Entity Recognition (NER) to identify 18+ types of identifiers (Names, SSNs, Phone Numbers, Locations) directly within the secure application boundary.
@@ -223,6 +223,8 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 * **Network Hardening:** All reasoning nodes are located in Private Subnets. Egress traffic to the Gemini API and PubMed is routed through a central NAT Gateway, providing a single, auditable point for outgoing data.
 
 * **Adversarial Defense:** Every user query is scanned by ProtectAI to detect prompt injections, ensuring the agent cannot be manipulated into revealing system prompts or bypassing clinical guardrails.
+
+* **Least Privilege:** EC2 nodes are assigned granular IAM roles, granting access only to the specific Pinecone indices and Gemini API keys required for their specific task.
   
 ## 👥 The Team
 This product was developed by a cross-functional team with expertise across the full software lifecycle:
