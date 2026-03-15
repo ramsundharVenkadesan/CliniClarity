@@ -98,6 +98,14 @@ Below is the architectural blueprint of CliniClarity, illustrating the flow from
    * **Reasoning Engine**: Gemini 3 Flash (Native Tool Calling)
    * **Knowledge Retrieval:** Tiered RAG (Internal Pinecone Vector Store + External PubMed MCP)
    * **Verification:** DeepEval (Deterministic Hallucination & Faithfulness auditing)
+2. **Security & Guardrails**
+   * **Adversarial Defense:** ProtectAI DeBERTa (Local Prompt Injection detection)
+   * **Data Privacy:** **Microsoft Presidio** (Local PII/PHI redaction)
+   * **Intent Routing:** Semantic Vector Router (Cosine Similarity topic enforcement)
+3. **Data & Infrastructure**
+   * **Vector Database:** Pinecone (Serverless)
+   * **Infrastructure as Code:** Terraform (AWS VPC & EC2 orchestration)
+   * **API Layer:** FastAPI with Asynchronous Server-Sent Events (SSE)
 
 Orchestration: LangGraph (State Machine logic) & LangChain (Tool binding)
 
@@ -120,14 +128,15 @@ To ensure sensitive data is never used to train public models, CliniClarity impl
 * **PII/PHI Redaction:** A dedicated Lambda function matches PHI found by AWS Comprehend Medical to coordinates provided by AWS Textract
 * **Sanitization:** Uses the ReportLab library to draw solid black boxes over sensitive metadata, ensuring it cannot be searched or highlighted.
 
-## 🚀 Key Benefits
+#### 🚀 Key Strategic Benefits
 | Feature | Traditional LLMs / Search Engines | CliniClarity (Our Product) | PLM Strategic Value |
-|--------|----------------------------------|---------------------------|---------------------|
-| **Information Source** | Guesses based on patterns or SEO-optimized blogs | Grounded in patient records and vetted medical journals | **Trust:** Reduces medical anxiety by ensuring 100% clinical validity |
-| **Logic & Reasoning** | Single-shot responses often prone to hallucinations | ReAct Loop: Thinking → Action → Observation before answering | **Accuracy:** Forces the model to reason through clinical steps before delivery |
-| **Data Privacy** | Sensitive data may be used to train public models | Healthcare-grade security with automated PII/PHI redaction | **Compliance:** Built with Privacy by Design to meet HIPAA-grade standards |
-| **Traceability** | Provides general advice without specific source links | Every statement is directly linked to a record line or a DOI | **Auditability:** Empowers patients with exact evidence for doctor consultations |
-| **Knowledge Retrieval** | Limited to the model's training cutoff date | Tiered Retrieval: Vector Store (Internal) + PubMed (External) | **Efficiency:** Prioritizes user context first, augmenting with external data only when needed |
+|--------|------------------------------------|----------------------------|---------------------|
+| **Information Source** | Guesses based on patterns or SEO-optimized blogs | Grounded in patient records and peer-reviewed PubMed literature | **Trust:** Reduces medical anxiety by ensuring 100% clinical validity. |
+| **Logic & Reasoning** | Single-shot responses prone to hallucinations | Agentic RAG: Multi-turn reasoning with native tool calling | **Accuracy:** Eliminates "guessing" by forcing the model to verify facts against clinical data. |
+| **Data Privacy** | Sensitive data may be used to train public models | Local PII/PHI redaction via Microsoft Presidio before cloud egress | **Compliance:** Built with "Privacy by Design" to meet HIPAA Safe Harbor standards. |
+| **Adversarial Security** | Vulnerable to prompt injections and jailbreaks | Deterministic Guardrails: Local ProtectAI scan and Semantic Routing | **Safety:** Prevents system hijacking and ensures the agent remains strictly within the medical domain. |
+| **Auditability** | Provides general advice without specific source links | Every response is cited with a specific DOI and evaluated via DeepEval | **Reliability:** Empowers patients with verifiable evidence for physician consultations. |
+| **Knowledge Retrieval** | Limited to the model's training cutoff date | Real-time Tiered Retrieval: Vector Store (Internal) + FastMCP (External) | **Efficiency:** Prioritizes specific patient context while augmenting with the latest medical research. |
 
 ## 👥 The Team
 This product was developed by a cross-functional team with expertise across the full software lifecycle:
