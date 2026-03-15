@@ -136,6 +136,8 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 ---
 
 ## Cloud Architecture
+The application is deployed directly to high-performance EC2 instances within a hardened AWS environment, utilizing an Auto Scaling Group (ASG) for high availability and tiered subnets for data isolation.
+
 ```mermaid
 flowchart LR
 
@@ -206,6 +208,22 @@ style PrivateSubnet fill:none,stroke:#007bff,stroke-width:2.5px,stroke-dasharray
 style ASG fill:none,stroke:#333333,stroke-width:1px,stroke-dasharray:3 3
 ```
 
+
+## 🔒 Security & HIPAA-First Data Pipeline
+To ensure Protected Health Information (PHI) is never exposed to public models or unauthorized cloud logs, CliniClarity implements a "Local-First" automated redaction pipeline. This architecture satisfies HIPAA "Safe Harbor" standards by de-identifying data before it enters the RAG ecosystem.
+
+* **Deterministic PII/PHI Redaction:** Instead of relying on cloud-based NLP, CliniClarity utilizes a local instance of Microsoft Presidio. This engine performs Named Entity Recognition (NER) to identify 18+ types of identifiers (Names, SSNs, Phone Numbers, Locations) directly within the secure application boundary.
+
+* **Zero-Egress Sanitization:** The redaction process uses the Presidio-Anonymizer to replace sensitive metadata with generic placeholders (e.g., [REDACTED_NAME]) or cryptographic hashes. This ensures that the text remains clinically useful for the LLM while being mathematically stripped of identity.
+
+* **Safe Harbor Compliance:** By scrubbing data locally before it reaches the Gemini Embedding or Pinecone Vector Store, the system ensures that no PII is ever used for model training or stored in a third-party database.
+
+* **Immutable Redaction (PDF):** For document visualization, the system utilizes the ReportLab library to draw physical, non-recoverable black boxes over identified PHI coordinates, ensuring sensitive data cannot be recovered via text highlighting or metadata scraping.
+  
+* **Network Hardening:** All reasoning nodes are located in Private Subnets. Egress traffic to the Gemini API and PubMed is routed through a central NAT Gateway, providing a single, auditable point for outgoing data.
+
+* **Adversarial Defense:** Every user query is scanned by ProtectAI to detect prompt injections, ensuring the agent cannot be manipulated into revealing system prompts or bypassing clinical guardrails.
+  
 ## 👥 The Team
 This product was developed by a cross-functional team with expertise across the full software lifecycle:
 * **Bruno:** Containerization and Infrastructure
@@ -226,8 +244,10 @@ To manage the complex clinical reasoning required for healthcare, CliniClarity u
 ### Infrastructure as Code (IaC): Terraform
 To ensure the product can be deployed reliably across different environments (Dev, QA, Production), the entire AWS architecture is managed via **Terraform.**
 * **Hardened Network Architecture:** Terraform defines a multi-tier VPC with strictly isolated private subnets. This ensures that the reasoning agent and sensitive ingestion nodes have zero public ingress, effectively creating a "walled garden" for patient data.
-* **Resource Reproducibility:** Every component—from the Pinecone vector indices to the compute instances running the FastMCP server—is defined in declarative `.tf` files, allowing for rapid, audited deployments across staging and production environments.
+* **Reproducibility:** The platform utilizes Custom AMIs (Amazon Machine Images) pre-configured with the CliniClarity environment. Terraform manages the Launch Templates and Auto Scaling Group (ASG) to ensure consistent deployment of these instances across Availability Zones without the overhead of a container shim."
 * **Least Privilege IAM:** Access to the Gemini API and vector store is managed through scoped IAM roles, ensuring that each node in the graph only has the specific permissions required for its task.
+* **Configuration Management:** Application updates are delivered via rolling deployments, where the ASG rotates instances to ensure zero downtime.
+* **Native Scaling:** Managed via **Auto Scaling Groups (ASG)** and **Launch Templates**. New instances are initialized with a custom AMI pre-loaded with the Python environment and application dependencies.
 
 ---
   
@@ -241,4 +261,6 @@ To ensure the product can be deployed reliably across different environments (De
 * **Pinecone:** A high-performance vector database that stores the anonymized embeddings of clinical reports, enabling sub-second Retrieval-Augmented Generation (RAG).
 
 * **DeepEval:** A specialized testing framework used to objectively audit the agent's output. It acts as the final "clinical auditor," measuring the factual alignment between the generated summary and the source medical records.
+
+* **EC2 (Amazon Elastic Compute Cloud):** High-performance instances serving as the native host for the LangGraph agent. By deploying directly to the OS, we reduce network latency and simplify the security audit path for HIPAA compliance.
 
