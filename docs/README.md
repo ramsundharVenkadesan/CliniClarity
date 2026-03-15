@@ -1,33 +1,93 @@
 # CliniClarity: From Medical Anxiety to Medical Literacy
 
-**"A personal health research assistant designed to be a bridge between a clinical visit and a patient's home life."**
+**A personal health research assistant designed to be a bridge between a clinical visit and a patient's home life.**
 
 ## 📋 Product Vision and Strategy 
-CliniClarity is not a diagnostic engine; it is a specialized research librarian engineered to help patients navigate complex medical journey
+CliniClarity is not a diagnostic engine; it is a specialized AI Security Architect-led research platform engineered to help patients navigate complex medical journeys with grounded, verifiable intelligence.
 
 ### The Problem: Dense Jargon and "Dr.Google
-* **Medical Complexity:** Patients often receive 20+ page medical or imaging reports where critical insights are buried. 
-* **Information Gap:** Reports are written for billing and peer-to-peer clinical communication, not for patient comprehension
-* **Unverified Sources:** When turning to search engines, patients encounted a mix of "Dr.Google" anecdotes, unverified blogs, and marketing that lacks clinical validity
+* **Medical Complexity:** Patients receive dense reports where critical insights are buried in peer-to-peer clinical shorthand.
+* **The Hallucination Risk:** General LLMs often "guess" or prioritize SEO-optimized blogs over clinical reality.
+* **Security Vulnerabilities:** Standard AI wrappers are susceptible to prompt injections and PII leaks, making them unsuitable for healthcare.
 
-### The Solution: Grounded Intelligence
-Unlike general LLMs that may hallucinate or prioritize SEO content, CliniClarity provides grounded, evidence-based information.
-* **Context Aware:** The assistant understands the specific context of the user's health report before searching for answers
-* **Authority-First:** Prioritizes peer-reviewed status and impact factor by querying high-authority databases like PubMed or PMC
+### The Solution: Deterministic & Grounded Intelligence
+CliniClarity provides an evidence-based pipeline where every response is mathematically and clinically verified.
+* **Security-First:** Implements local adversarial defense to block prompt injections before they reach the reasoning engine.
+* **Clinically Grounded:** Uses a dedicated FastMCP server to query high-authority databases like PubMed.
+* **Verified Output:** Utilizes DeepEval to audit for hallucinations, ensuring the final answer strictly adheres to the provided medical context.
 
-## 🛠️ Product Architecture
-The product lifecycle is built on a "Privacy by Design" framework, ensuring healthcare-grade security and technical transparency
-#### The Agent Lifecycle
-1. **Automated Insight Generation (RAG):** Upon document upload, the system intiates a Retrieval-Augmented Generation (RAG) pipline to synthesize the report
-     *  The PDF data is chunked and converted into vectors (embeddings) stored within OpenSearch Serveless
-     *  The LLM uses the vector store to ground results, automatically extracting key bio-markers and translating complex lab values into a high-level summary for the user
-     * This phase ensures the patient receives instant clarity on their medical reports
-2. **Interactive Research Assistant (ReAct):** Once the summary is provided, the system transitions into an autonomous agent to handle follow-up questions (Ex: _"What does this specific white blood cell count mean for my diagnosis?"_)
-     * The agent first queries the OpenSearch vector store to retrieve specific context from the user's uploaded medical report
-     * The LLM follows a Thinking -> Action -> Observation loop to determine if the internal record provides enough information or if external validation is required
-     * If the internal report lacks necessary clinical background, the agent executes a search tool to query high-authority databases like PubMed
-     * The result from PubMed is passed back to LLM as part of the observation, ensuring the final answer is a synthesis fo patient's data and peer-reviewed literature
-     * Every response is cited with a specific DOI from the medical journal to ensure 100% auditability.
+## 🛠️ Agent Architecture
+
+#### Visualizing the Pipeline
+<pre>
+    graph TD
+    %% Global Styles
+    classDef userNode fill:#ffffff,stroke:#000,stroke-width:2px,color:#000,font-weight:bold;
+    classDef security fill:#fff1f1,stroke:#e57373,stroke-width:2px,color:#b71c1c;
+    classDef core fill:#f0f7ff,stroke:#64b5f6,stroke-width:2px,color:#0d47a1;
+    classDef tool fill:#f6fff8,stroke:#81c784,stroke-width:2px,color:#1b5e20;
+    classDef final fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff,font-weight:bold;
+    classDef block fill:#c62828,stroke:#b71c1c,stroke-width:2px,color:#fff;
+    classDef ingestion fill:#fff9db,stroke:#f59f00,stroke-width:2px,color:#862e00;
+
+    %% 1. Secure Ingestion Pipeline
+    User((User)):::userNode -->|Upload PDF| PDF[PDF Parser/PyMuPDF]:::ingestion
+    
+    subgraph SI [🔐 SECURE INGESTION LAYER]
+        PDF --> Presidio[Microsoft Presidio: Local PII Redaction]:::security
+        Presidio -->|Anonymized Text| Embed[Gemini-Embedding-001]:::ingestion
+        Embed --> VectorDB[(Pinecone: Anonymized Vector Store)]:::tool
+    end
+
+    %% 2. Adversarial Query Defense
+    User -->|Question| API[FastAPI Gateway]
+    
+    subgraph SG [🛡️ ADVERSARIAL DEFENSE LAYER]
+        API --> PI[ProtectAI: Injection Scan]:::security
+        PI -->|Fail| Block1[❌ BLOCKED]:::block
+        PI -->|Pass| MI[Semantic: Intent Route]:::security
+        MI -->|Fail| Block2[❌ OFF-TOPIC]:::block
+    end
+
+    %% 3. Agentic Reasoning
+    subgraph AC [🧠 AGENTIC REASONING]
+        MI -->|Pass| Agent[LangGraph Controller]:::core
+        Agent <--> LLM[Gemini 3 Flash]:::core
+        
+        subgraph TL [🛠️ MCP & DATA TOOLS]
+            Agent <--> VectorDB
+            Agent <--> PubMed[MCP: PubMed Server]:::tool
+        end
+    end
+
+    %% 4. Quality Assurance
+    subgraph VQ [✅ QUALITY ASSURANCE]
+        Agent --> Eval[DeepEval: Hallucination Check]:::core
+        Eval -->|Pass| Out[Final 6th-Grade Answer]:::final
+        Eval -->|Fail| Agent
+    end
+
+    %% Apply Container Styles
+    style SI fill:none,stroke:#f59f00,stroke-dasharray: 5 5
+    style SG fill:none,stroke:#e57373,stroke-dasharray: 5 5
+    style AC fill:none,stroke:#64b5f6,stroke-dasharray: 5 5
+    style VQ fill:none,stroke:#9575cd,stroke-dasharray: 5 5
+</pre>
+
+#### 🚀 Key Technological Pillars
+Below is the architectural blueprint of CliniClarity, illustrating the flow from secure ingestion to verified synthesis.
+1. **The Agentic Core: LangGraph & Native Tool Calling**
+   We moved beyond linear chains to a State Machine architecture using LangGraph.
+     *  **Deterministic Flow:** Each stage—from ingestion to synthesis—is a verifiable node in the graph.
+     *  **Native Tool Calling:** Deprecated legacy ReAct text-parsing in favor of Native JSON Tool Calling, reducing hijacking risks and improving response latency.
+3. **Multi-Layered Guardrails (Adversarial Defense)**
+   To ensure HIPAA-grade safety, the system implements a "Defense-in-Depth" strategy:
+     * **Prompt Injection Defense:** Integrated a local Hugging Face SLM (ProtectAI DeBERTa) to block adversarial attacks before they reach the LLM.
+     * **Semantic Routing:** Uses cosine similarity math to ensure the system strictly only processes clinical and biological queries.
+4. **FastMCP: Medical Knowledge Integration**
+   Utilizing the **Model Context Protocol (MCP)**, CliniClarity securely bridges the gap between patient data and external clinical literature.
+     * **PubMed Server:** A standalone MCP server queries the National Library of Medicine directly, providing the agent with peer-reviewed verification of medical terms found in the user's report.
+
 * **Tech Stack**: Built using AWS Bedrock, OpenSearch Serverless, and Claude Sonnet/Nova Pro
 #### Security & HIPAA-First Data Pipeline
 To ensure sensitive data is never used to train public models, CliniClarity implements an automated redaction pipeline.
