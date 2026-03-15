@@ -138,66 +138,50 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 ## Cloud Architecture
 ```mermaid
 flowchart TD
-    %% 1. INPUT VECTORS
-    User((User/Patient)) -->|1: PDF Upload| S[/FastAPI: /summary/]
-    User -->|2: Ask Question| Q[/FastAPI: /question/]
+    %% 1. USER ACCESS
+    U((User/Patient)) --&gt;|Step 1: Upload| ALB[Application Load Balancer]
+    U --&gt;|Step 2: Query| ALB
 
-    subgraph DMZ [🌐 PUBLIC SUBNET - DMZ]
-        S
-        Q
+    %% 2. PUBLIC TIER
+    subgraph DMZ [🌐 PUBLIC SUBNET]
+        ALB
         NAT[NAT Gateway]
     end
 
-    subgraph SECURE [🔐 PRIVATE SUBNET - HIPAA ZONE]
+    %% 3. PRIVATE TIER
+    subgraph PRIVATE [🔐 PRIVATE SUBNET - HIPAA ZONE]
         direction TB
-        subgraph ASG [Auto Scaling Group]
-            subgraph NODE [EC2 Instance]
-                
-                subgraph INGEST [📂 SECURE INGESTION]
-                    PDF[PDF Parser] --> PRE[Microsoft Presidio]
-                    PRE --> EMB[Gemini Embedding]
-                end
+        
+        subgraph ASG [Auto Scaling Group: Dynamic Capacity]
+            direction LR
+            EC2_A[[EC2: Agent Node A]]
+            EC2_B[[EC2: Agent Node B]]
+            EC2_C[[EC2: Agent Node C]]
+        end
 
-                subgraph DEFENSE [🛡️ ADVERSARIAL DEFENSE]
-                    PI[ProtectAI Scan]
-                    MI[Semantic Router]
-                end
-
-                subgraph CORE [🧠 LANGGRAPH CORE]
-                    LG[LangGraph Controller]
-                    PUB[PubMed MCP]
-                    DB[(Pinecone DB)]
-                end
-
-                subgraph AUDIT [✅ QUALITY AUDIT]
-                    DE[DeepEval Check]
-                end
-            end
+        subgraph DATA [🗄️ INTERNAL DATA]
+            VDB[(Pinecone Vector DB)]
         end
     end
 
-    %% Logic Routing
-    S --> PDF
-    EMB --> DB
-    Q --> PI
-    PI -->|Pass| MI
-    MI -->|Pass| LG
-    LG <--> DB
-    LG <--> PUB
-    LG --> DE
-    DE -->|Verified| User
-    DE -->|Fail| LG
+    %% 4. EXTERNAL EGRESS
+    NAT --&gt;|Secure API Calls| GEMINI{Gemini 3 Flash}
+    NAT --&gt;|Secure API Calls| PUB([PubMed MCP])
 
-    %% Style Overrides
-    style DMZ fill:none,stroke:#d4a017,stroke-width:2px,stroke-dasharray:5 5
-    style SECURE fill:none,stroke:#007bff,stroke-width:2px,stroke-dasharray:5 5
-    style PRE fill:#fff5f5,stroke:#c0392b,stroke-width:2px,color:#000
-    style PI fill:#fff5f5,stroke:#c0392b,stroke-width:2px,color:#000
-    style MI fill:#fff5f5,stroke:#c0392b,stroke-width:2px,color:#000
-    style LG fill:#f0f7ff,stroke:#007bff,stroke-width:2px,color:#000
-    style PUB fill:#fafffa,stroke:#27ae60,stroke-width:2px,color:#000
-    style DB fill:#fafffa,stroke:#27ae60,stroke-width:2px,color:#000
-    style DE fill:#f3e5f5,stroke:#9b59b6,stroke-width:2px,color:#000
+    %% Routing
+    ALB --&gt;|Traffic Routing| ASG
+    ASG &lt;--&gt; VDB
+    ASG --&gt;|Egress via NAT| NAT
+
+    %% Dark Mode Optimized Styling
+    style DMZ fill:none,stroke:#d4a017,stroke-width:2px,stroke-dasharray: 5 5
+    style PRIVATE fill:none,stroke:#007bff,stroke-width:2px,stroke-dasharray: 5 5
+    style ASG fill:none,stroke:#333,stroke-width:2px,stroke-dasharray: 2 2
+    style EC2_A fill:#f0f7ff,stroke:#007bff,stroke-width:1.5px,color:#000
+    style EC2_B fill:#f0f7ff,stroke:#007bff,stroke-width:1.5px,color:#000
+    style EC2_C fill:#f0f7ff,stroke:#007bff,stroke-width:1.5px,color:#000
+    style VDB fill:#fafffa,stroke:#27ae60,stroke-width:2px,color:#000
+    style ALB fill:#ffffff,stroke:#007bff,stroke-width:2px,color:#000
 ```
 
 ## 👥 The Team
