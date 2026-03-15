@@ -92,7 +92,20 @@ Below is the architectural blueprint of CliniClarity, illustrating the flow from
    Every response undergoes an automated hallucination check. Using **DeepEval**, the system measures "Faithfulness" by comparing the generated answer against the retrieved document chunks, preventing the model from inventing clinical findings.
 
 
-* **Tech Stack**:
+#### 🛠️ The Tech Stack
+1. **Core AI & Orchestration (Agentic RAG)**
+   * **Orchestration:** LangGraph (State Machine logic) & LangChain (Tool binding)
+   * **Reasoning Engine**: Gemini 3 Flash (Native Tool Calling)
+   * **Knowledge Retrieval:** Tiered RAG (Internal Pinecone Vector Store + External PubMed MCP)
+   * **Verification:** DeepEval (Deterministic Hallucination & Faithfulness auditing)
+
+Orchestration: LangGraph (State Machine logic) & LangChain (Tool binding)
+
+Reasoning Engine: Gemini 3 Flash (Native Tool Calling)
+
+Knowledge Retrieval: Tiered RAG (Internal Pinecone Vector Store + External PubMed MCP)
+
+Verification: DeepEval (Deterministic Hallucination & Faithfulness auditing)
 * **Language:** Python 3.13
 * **Orchestration:** LangGraph & LangChain
 * **LLM:** Gemini 3 Flash
