@@ -139,8 +139,8 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 ```mermaid
 flowchart TD
     %% 1. USER ACCESS
-    U((User/Patient)) --&gt;|Step 1: Upload| ALB[Application Load Balancer]
-    U --&gt;|Step 2: Query| ALB
+    U((User/Patient)) -->|Step 1: Upload| ALB[Application Load Balancer]
+    U -->|Step 2: Query| ALB
 
     %% 2. PUBLIC TIER
     subgraph DMZ [🌐 PUBLIC SUBNET]
@@ -165,13 +165,13 @@ flowchart TD
     end
 
     %% 4. EXTERNAL EGRESS
-    NAT --&gt;|Secure API Calls| GEMINI{Gemini 3 Flash}
-    NAT --&gt;|Secure API Calls| PUB([PubMed MCP])
+    NAT -->|Secure API Calls| GEMINI{Gemini 3 Flash}
+    NAT -->|Secure API Calls| PUB([PubMed MCP])
 
     %% Routing
-    ALB --&gt;|Traffic Routing| ASG
-    ASG &lt;--&gt; VDB
-    ASG --&gt;|Egress via NAT| NAT
+    ALB -->|Traffic Routing| ASG
+    ASG &lt;-->; VDB
+    ASG -->|Egress via NAT| NAT
 
     %% Dark Mode Optimized Styling
     style DMZ fill:none,stroke:#d4a017,stroke-width:2px,stroke-dasharray: 5 5
