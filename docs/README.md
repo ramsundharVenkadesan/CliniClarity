@@ -138,24 +138,25 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 ## Cloud Architecture
 ```mermaid
 flowchart TD
-    %% 1. VIRTUAL PRIVATE CLOUD (VPC)
-    subgraph VPC [☁️ AWS VPC - 10.0.0.0/16]
-        direction TB
+    %% 1. USER ACCESS
+    U((Patient / User)):::userNode -->|Step 1: Upload| ALB[Application Load Balancer]
+    U -->|Step 2: Query| ALB
 
-        %% 2. PUBLIC TIER
-        subgraph DMZ [🌐 PUBLIC SUBNET - DMZ]
-            ALB[Application Load Balancer]:::resource
+    %% 2. VPC CONTAINER
+    subgraph VPC [AWS VPC]
+        
+        %% 3. PUBLIC TIER
+        subgraph PublicSubnet [PUBLIC SUBNET - DMZ]
+            direction TB
+            ALB:::resource
             NAT[NAT Gateway]:::resource
         end
 
-        %% 3. PRIVATE TIER
-        subgraph HIPAA [🔐 PRIVATE SUBNET - HIPAA ZONE]
+        %% 4. PRIVATE TIER
+        subgraph PrivateSubnet [PRIVATE SUBNET - HIPAA ZONE]
             direction TB
             
-            %% ASG as a Logic Node to avoid blocking text
-            ASG{Auto Scaling Group}:::asg
-            
-            subgraph COMPUTE [Agentic Compute Cluster]
+            subgraph ASG [Auto Scaling Group: CliniClarity Node Cluster]
                 direction LR
                 EC2_A[[EC2 Agent Node A]]:::instance
                 EC2_B[[EC2 Agent Node B]]:::instance
@@ -166,36 +167,27 @@ flowchart TD
         end
     end
 
-    %% 4. EXTERNAL SERVICES
-    U((Patient / User)):::userNode
-    GEMINI{Gemini 3 Flash}:::external
-    PUB([PubMed MCP]):::external
+    %% 5. EXTERNAL SERVICES
+    NAT -->|Secure API Calls| GEMINI{Gemini 3 Flash}
+    NAT -->|Secure API Calls| PUB([PubMed MCP Server])
 
-    %% Routing
-    U -->|HTTPS| ALB
+    %% Inter-Tier Connections
     ALB -->|Inbound Traffic| ASG
-    ASG -->|Manages| EC2_A
-    ASG -->|Manages| EC2_B
-    ASG -->|Manages| EC2_C
+    ASG <--> VDB
+    ASG -->|Egress via NAT| NAT
 
-    COMPUTE <-->|RAG Lookup| VDB
-    COMPUTE -->|Secure Egress| NAT
-    
-    NAT -->|API Calls| GEMINI
-    NAT -->|API Calls| PUB
+    %% Dark-Mode Optimized High-Contrast Styling
+    %% These classes guarantee black text on a white box with colored borders
+    classDef userNode fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000;
+    classDef resource fill:#ffffff,stroke:#007bff,stroke-width:2px,color:#000000;
+    classDef instance fill:#ffffff,stroke:#007bff,stroke-width:1.5px,color:#000000;
+    classDef database fill:#ffffff,stroke:#28a745,stroke-width:2px,color:#000000;
 
-    %% Styling for High Contrast (Dark/Light Mode)
-    classDef userNode fill:#ffffff,stroke:#000,stroke-width:2px,color:#000
-    classDef resource fill:#ffffff,stroke:#d4a017,stroke-width:2px,color:#000
-    classDef asg fill:#f0f7ff,stroke:#007bff,stroke-width:2px,color:#000
-    classDef instance fill:#ffffff,stroke:#007bff,stroke-width:1.5px,color:#000
-    classDef database fill:#fafffa,stroke:#27ae60,stroke-width:2px,color:#000
-    classDef external fill:#ffffff,stroke:#333,stroke-width:2px,color:#000
-
-    style VPC fill:none,stroke:#333,stroke-width:4px
-    style DMZ fill:none,stroke:#d4a017,stroke-width:2px,stroke-dasharray: 5 5
-    style HIPAA fill:none,stroke:#007bff,stroke-width:2px,stroke-dasharray: 5 5
-    style COMPUTE fill:none,stroke:#333,stroke-width:1px,stroke-dasharray: 3 3
+    %% Subnet & VPC Styles (No Fill, Bold Dashed Borders)
+    style VPC fill:none,stroke:#333333,stroke-width:3px;
+    style PublicSubnet fill:none,stroke:#ffc107,stroke-width:2.5px,stroke-dasharray: 5 5;
+    style PrivateSubnet fill:none,stroke:#007bff,stroke-width:2.5px,stroke-dasharray: 5 5;
+    style ASG fill:none,stroke:#333333,stroke-width:1px,stroke-dasharray: 3 3;
 ```
 
 ## 👥 The Team
