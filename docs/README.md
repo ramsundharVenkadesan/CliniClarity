@@ -19,7 +19,7 @@ CliniClarity provides an evidence-based pipeline where every response is mathema
 ## 🛠️ Agent Architecture
 
 #### Visualizing the Pipeline
-<pre>
+```mermaid
     graph TD
     %% Global Styles
     classDef userNode fill:#ffffff,stroke:#000,stroke-width:2px,color:#000,font-weight:bold;
@@ -72,7 +72,7 @@ CliniClarity provides an evidence-based pipeline where every response is mathema
     style SG fill:none,stroke:#e57373,stroke-dasharray: 5 5
     style AC fill:none,stroke:#64b5f6,stroke-dasharray: 5 5
     style VQ fill:none,stroke:#9575cd,stroke-dasharray: 5 5
-</pre>
+```
 
 #### 🚀 Key Technological Pillars
 Below is the architectural blueprint of CliniClarity, illustrating the flow from secure ingestion to verified synthesis.
