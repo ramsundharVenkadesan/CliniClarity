@@ -138,37 +138,41 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 ## Cloud Architecture
 ```mermaid
 flowchart TD
-    %% 1. USER INTERFACE
-    U((Patient / User)):::userNode -->|1: PDF Upload| ALB
-    U -->|2: Query| ALB
-
-    %% 2. PUBLIC TIER
-    subgraph DMZ [PUBLIC SUBNET - DMZ]
-        ALB[Application Load Balancer]:::resource
-        NAT[NAT Gateway]:::resource
-    end
-
-    %% 3. PRIVATE TIER
-    subgraph HIPAA [PRIVATE SUBNET - HIPAA ZONE]
+    %% 1. VIRTUAL PRIVATE CLOUD (VPC)
+    subgraph VPC [☁️ AWS VPC - 10.0.0.0/16]
         direction TB
-        
-        ASG{Auto Scaling Group}:::asg
-        
-        subgraph COMPUTE [Agentic Compute Cluster]
-            direction LR
-            EC2_A[[EC2 Agent Node A]]:::instance
-            EC2_B[[EC2 Agent Node B]]:::instance
-            EC2_C[[EC2 Agent Node C]]:::instance
+
+        %% 2. PUBLIC TIER
+        subgraph DMZ [🌐 PUBLIC SUBNET - DMZ]
+            ALB[Application Load Balancer]:::resource
+            NAT[NAT Gateway]:::resource
         end
 
-        VDB[(Pinecone Vector DB)]:::database
+        %% 3. PRIVATE TIER
+        subgraph HIPAA [🔐 PRIVATE SUBNET - HIPAA ZONE]
+            direction TB
+            
+            %% ASG as a Logic Node to avoid blocking text
+            ASG{Auto Scaling Group}:::asg
+            
+            subgraph COMPUTE [Agentic Compute Cluster]
+                direction LR
+                EC2_A[[EC2 Agent Node A]]:::instance
+                EC2_B[[EC2 Agent Node B]]:::instance
+                EC2_C[[EC2 Agent Node C]]:::instance
+            end
+
+            VDB[(Pinecone Vector DB)]:::database
+        end
     end
 
     %% 4. EXTERNAL SERVICES
+    U((Patient / User)):::userNode
     GEMINI{Gemini 3 Flash}:::external
     PUB([PubMed MCP]):::external
 
     %% Routing
+    U -->|HTTPS| ALB
     ALB -->|Inbound Traffic| ASG
     ASG -->|Manages| EC2_A
     ASG -->|Manages| EC2_B
@@ -180,7 +184,7 @@ flowchart TD
     NAT -->|API Calls| GEMINI
     NAT -->|API Calls| PUB
 
-    %% Styling for Dark Mode Visibility
+    %% Styling for High Contrast (Dark/Light Mode)
     classDef userNode fill:#ffffff,stroke:#000,stroke-width:2px,color:#000
     classDef resource fill:#ffffff,stroke:#d4a017,stroke-width:2px,color:#000
     classDef asg fill:#f0f7ff,stroke:#007bff,stroke-width:2px,color:#000
@@ -188,6 +192,7 @@ flowchart TD
     classDef database fill:#fafffa,stroke:#27ae60,stroke-width:2px,color:#000
     classDef external fill:#ffffff,stroke:#333,stroke-width:2px,color:#000
 
+    style VPC fill:none,stroke:#333,stroke-width:4px
     style DMZ fill:none,stroke:#d4a017,stroke-width:2px,stroke-dasharray: 5 5
     style HIPAA fill:none,stroke:#007bff,stroke-width:2px,stroke-dasharray: 5 5
     style COMPUTE fill:none,stroke:#333,stroke-width:1px,stroke-dasharray: 3 3
