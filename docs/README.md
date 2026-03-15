@@ -139,8 +139,8 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 ```mermaid
 flowchart TD
     %% 1. INPUT VECTORS
-    User((User/Patient)) --&gt;|1: PDF Upload| S[/FastAPI: /summary/]
-    User --&gt;|2: Ask Question| Q[/FastAPI: /question/]
+    User((User/Patient)) -->|1: PDF Upload| S[/FastAPI: /summary/]
+    User -->|2: Ask Question| Q[/FastAPI: /question/]
 
     subgraph DMZ [🌐 PUBLIC SUBNET - DMZ]
         S
@@ -154,8 +154,8 @@ flowchart TD
             subgraph NODE [EC2 Instance]
                 
                 subgraph INGEST [📂 SECURE INGESTION]
-                    PDF[PDF Parser] --&gt; PRE[Microsoft Presidio]
-                    PRE --&gt; EMB[Gemini Embedding]
+                    PDF[PDF Parser] --> PRE[Microsoft Presidio]
+                    PRE --> EMB[Gemini Embedding]
                 end
 
                 subgraph DEFENSE [🛡️ ADVERSARIAL DEFENSE]
@@ -177,20 +177,20 @@ flowchart TD
     end
 
     %% Logic Routing
-    S --&gt; PDF
-    EMB --&gt; DB
-    Q --&gt; PI
-    PI --&gt;|Pass| MI
-    MI --&gt;|Pass| LG
-    LG &lt;--&gt; DB
-    LG &lt;--&gt; PUB
-    LG --&gt; DE
-    DE --&gt;|Verified| User
-    DE --&gt;|Fail| LG
+    S --> PDF
+    EMB --> DB
+    Q --> PI
+    PI -->|Pass| MI
+    MI -->|Pass| LG
+    LG <--> DB
+    LG <--> PUB
+    LG --> DE
+    DE -->|Verified| User
+    DE -->|Fail| LG
 
-    %% Style Overrides for Dark/Light Mode Visibility
-    style DMZ fill:none,stroke:#d4a017,stroke-width:2px,stroke-dasharray: 5 5
-    style SECURE fill:none,stroke:#007bff,stroke-width:2px,stroke-dasharray: 5 5
+    %% Style Overrides
+    style DMZ fill:none,stroke:#d4a017,stroke-width:2px,stroke-dasharray:5 5
+    style SECURE fill:none,stroke:#007bff,stroke-width:2px,stroke-dasharray:5 5
     style PRE fill:#fff5f5,stroke:#c0392b,stroke-width:2px,color:#000
     style PI fill:#fff5f5,stroke:#c0392b,stroke-width:2px,color:#000
     style MI fill:#fff5f5,stroke:#c0392b,stroke-width:2px,color:#000
