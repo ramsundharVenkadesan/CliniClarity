@@ -1,5 +1,12 @@
 # CliniClarity: Product Requirements Document (PRD)
-This document serves as the foundational strategic guide for CliniClarity, bridging the gap between clinical complexity and patient literacy through managed AI workflows.
+This document serves as the architectural blueprint for CliniClarity, an agentic AI system designed to bridge the gap between clinical complexity and patient literacy. Unlike traditional RAG applications, CliniClarity is engineered with a Security-First mindset, ensuring that medical document simplification never compromises data sovereignty or clinical integrity.
+
+---
+
+## Executive Summary
+CliniClarity transforms dense, jargon-heavy medical reports into empathetic, evidence-based summaries. By utilizing a stateful LangGraph orchestration, the system manages a multi-stage lifecycle that includes deterministic PII redaction, adversarial prompt defense, and real-time medical research via the Model Context Protocol (MCP).
+
+---
 
 ## User Personas (Discovery Phase)
 To ensure the product lifecycle is grounded in real-world needs, the following personas represent our primary target audience:
@@ -11,6 +18,23 @@ To ensure the product lifecycle is grounded in real-world needs, the following p
    * **Background:** Managing the health journey of a family member or dependent
    * **Pain Point:** Struggles to provide continuity across different specialists and fragmented medical reports
    * **Goal:** To translate complex lab values into high-level highlights to better manage care plans.
+
+---
+
+## Technical Stack & Architecture
+####Frameworks & Logic
+* **Orchestration:** LangGraph (Transitioned from basic LangChain ReAct to stateful tool-calling).
+* **API Layer:** FastAPI with asynchronous streaming for real-time user feedback.
+* **Research Protocol:** FastMCP connecting to PubMed for peer-reviewed validation.
+* **Vector Database:** Pinecone for localized patient context storage.
+
+####Security & Evaluation Layer
+* **PII Redaction:** Microsoft Presidio (Analyzer/Anonymizer) running locally to mask PHI before model ingestion.
+* **Adversarial Defense:** ProtectAI DeBERTa-v3 and Meta Prompt-Guard-86M for inference-time injection detection.
+* **Automated Auditing:** DeepEval for monitoring faithfulness and hallucination rates.
+
+---
+
 ## Autonomous Agent Lifecycle 
 This section details the two-phase logic that manages the transition from static summary to interactive research.
 * **Phase I: Automated Insight Generation (RAG)** 
