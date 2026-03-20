@@ -12,7 +12,12 @@ templates = Jinja2Templates(directory="templates")
 
 
 @rag_router.post("/")
-async def generate_summary(request: Request, file: UploadFile, llm_selection: str = Form(...)):
+async def generate_summary(
+    request: Request,
+    file: UploadFile,
+    llm_selection: str = Form(...),
+    run_eval: bool = Form(False) # <-- Added: Catches the checkbox state (defaults to False if unchecked)
+):
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Invalid file type.")
 
@@ -26,8 +31,10 @@ async def generate_summary(request: Request, file: UploadFile, llm_selection: st
             "file_path": pdf_path,
             "status": True,
             "documents": [],
+            "context": [],
             "question": "Summarize the patient's medical report based on the provided documents.",
-            "summary": ""
+            "summary": "",
+            "run_eval": run_eval # <-- Added: Injects the toggle state into LangGraph
         }
 
         # Define a dictionary to keep a running track of the state
@@ -51,7 +58,7 @@ async def generate_summary(request: Request, file: UploadFile, llm_selection: st
                     template_response = templates.TemplateResponse("report.html", {
                         "request": request,
                         "summary_html": html_markdown,
-                        "chunks": len(current_state.get("documents", [])),  # Now this will work!
+                        "chunks": len(current_state.get("documents", [])),
                         "sources": 1,
                         "llm_selection": llm_selection
                     })

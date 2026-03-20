@@ -4,9 +4,10 @@ from fastapi.responses import HTMLResponse
 from dotenv import load_dotenv
 load_dotenv()
 import RAG, REACT
-
-
 clini_clarity = FastAPI()
+
+
+
 templates = Jinja2Templates(directory="templates")
 
 clini_clarity.include_router(router=RAG.rag_router)
