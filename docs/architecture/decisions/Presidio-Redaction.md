@@ -42,6 +42,6 @@ graph LR
     * Local CPU/RAM usage increases during document ingestion.
     * Requires manual updates to Presidio's detection models to stay current with new PII patterns.
 
-## Alternative Considerations
+## Alternatives Considered
 * **AWS Comprehend PII:** Rejected due to external data transit and per-token costs.
 * **Manual Regex Redaction:** Rejected as it is too brittle for complex medical reports and fails to catch context-based PII.
