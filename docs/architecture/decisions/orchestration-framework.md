@@ -40,6 +40,7 @@ graph TD
 * **Detailed Tracing:** Native integration with X-Ray and LangSmith ensures that every decision made by the graph is logged for auditability—a critical requirement for healthcare architecture.
 * **Model Agnostic:** Through init_chat_model, we can dynamically swap the underlying LLM (e.g., from Gemini to a HIPAA-compliant private model) without rewriting the core logic.
 * **Scalable Tools:** New tools, such as additional MCP servers for different medical databases, can be added as nodes with minimal changes to the existing graph.
+* **Chain of Trust:** Provides a rigid, auditable execution path that guarantees the Security Injection and Redaction nodes cannot be bypassed by the agent's "autonomy".
 
 ## Consequences
 * **Advantages:**
