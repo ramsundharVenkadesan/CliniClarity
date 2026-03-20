@@ -31,6 +31,7 @@ graph LR
 * **Cost-Effectiveness:** There are no per-request costs associated with local execution, which is critical for scaling an entry-level project into an enterprise-ready system.
 * **Custom Medical Recognizers:** We can extend Presidio with custom logic to detect specific clinical jargon or hospital-specific IDs that general-purpose tools might miss.
 * **Auditability and Logging:** Redaction events can be logged to our local activity.log for debugging without risk of leaking PII to cloud-based logging services.
+* **PHI De-identification:** Ensures Protected Health Information (Names, DOBs) is stripped locally so it never enters the cloud-based LLM, satisfying the HIPAA Privacy Rule.
 
 ## Consequences
 * **Advantages**:
