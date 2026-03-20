@@ -1,7 +1,7 @@
 # Architecture Decision Record: Infrastructure as Code (IaC) with Terraform
 
 * **Status:** Accepted
-* **Last Updated:** 2026-03-19
+* **Date:** 2026-03-19
 
 ## Context
 To satisfy HIPAA requirements, the cloud environment hosting CliniClarity (VPCs, IAM roles, and S3 buckets) must be reproducible, version-controlled, and strictly isolated. Manual configuration ("ClickOps") introduces human error and lacks the audit trail necessary for healthcare certification.
