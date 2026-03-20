@@ -6,7 +6,7 @@
 ##  Context
 The CliniClarity application requires a sophisticated orchestration layer to manage interactions between LLMs (Gemini), vector databases (Pinecone), and external medical APIs (PubMed via MCP). A standard "black box" agent is insufficient for a medical context where reasoning steps must be transparent, secure, and highly controlled.
 
-## Decision: Adopt LangChain and LangGraph
+## Detailed Rationale
 We have selected LangChain for its extensive tool ecosystem and LangGraph for its ability to model the agent as a stateful, cyclic graph. 
 
 ### Framework Flow Diagram
@@ -30,7 +30,7 @@ graph TD
     style Critic fill:#e1f5fe,stroke:#0277bd
 ```
 
-## Decision
+## Detaile Raitonale
 * **State Machine Logic:** LangGraph allows for the explicit definition of nodes and edges, ensuring the agent follows a deterministic logical path rather than unpredictable autonomous loops.
 * **Customizable Nodes:** Every step—from data retrieval to clinical reasoning—is a distinct Python function that can be independently debugged and optimized.
 * **Security Injection:** The framework facilitates the insertion of pre-processing nodes, such as the is_prompt_injection check and Presidio redaction, before the LLM is ever engaged.
