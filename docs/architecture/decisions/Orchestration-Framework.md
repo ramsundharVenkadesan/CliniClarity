@@ -1,7 +1,7 @@
 # Architecture Decision Record: Orchestration with LangChain and LangGraph
 
 * **Status:** Accepted  
-* **Last Updated:** 2026-02-02   
+* **Date:** 2026-02-02   
 
 ##  Context
 The CliniClarity application requires a sophisticated orchestration layer to manage interactions between LLMs (Gemini), vector databases (Pinecone), and external medical APIs (PubMed via MCP). A standard "black box" agent is insufficient for a medical context where reasoning steps must be transparent, secure, and highly controlled.
