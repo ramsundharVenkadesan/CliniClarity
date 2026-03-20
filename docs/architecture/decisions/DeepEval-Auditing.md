@@ -1,7 +1,7 @@
 # Architecture Decision Record: Hallucination Auditing with DeepEval
 
 * **Status:** Accepted
-* **Last Updated:** 2026-02-19
+* **Date:** 2026-02-19
 
 ## Context
 In healthcare, a "hallucination" isn't just a bug; it is a potential medical liability that could lead to incorrect patient self-triage. We need a way to mathematically verify that the agent's summary is faithful to the original medical report.
