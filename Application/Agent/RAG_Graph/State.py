@@ -8,3 +8,4 @@ class GraphState(TypedDict):
     status:bool
     context:List[str]
     evaluation_score:float
+    run_eval: bool

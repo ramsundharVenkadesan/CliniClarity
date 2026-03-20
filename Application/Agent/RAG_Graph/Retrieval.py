@@ -8,6 +8,7 @@ from Agent.RAG_Graph.State import GraphState
 from Agent.RAG_Graph.Ingestion import vector_database
 from Agent.Prompts import Retrieval_Prompt
 
+
 def format_documents(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 

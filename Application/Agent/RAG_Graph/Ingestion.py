@@ -8,15 +8,19 @@ from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 from Agent.RAG_Graph.State import GraphState
 
+
+
 load_dotenv()
 
 embedding_model = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001", output_dimensionality=1536, google_api_key=os.environ.get("GOOGLE_API_KEY"))
 vector_database = PineconeVectorStore(embedding=embedding_model, index_name=os.environ.get("INDEX_NAME"))
 
+
 async def load_pdf(state:GraphState):
     loader = PyMuPDFLoader(state['file_path'])
     docs = loader.load()
     return {'documents': docs}
+
 
 async def redact_PII(state:GraphState):
     docs = state['documents']
@@ -31,12 +35,16 @@ async def redact_PII(state:GraphState):
 
     return {'documents': docs}
 
+
 async def ingestion(state:GraphState):
     try:
         cleaned_docs = state['documents']
         splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
         chunks = splitter.split_documents(cleaned_docs)
-        vector_database.delete(delete_all=True)
+        try:
+            vector_database.delete(delete_all=True)
+        except Exception as delete_error:
+            print(f"Notice: Skipped deletion (index likely empty). Details: {delete_error}")
         PineconeVectorStore.from_documents(documents=chunks, embedding=embedding_model, index_name=os.environ.get("INDEX_NAME"))
         return {'documents':chunks, 'status': True}
     except Exception as e:
