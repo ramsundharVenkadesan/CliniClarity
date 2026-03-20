@@ -50,4 +50,6 @@ graph TD
   * Higher initial learning curve compared to simple "Chat" wrappers.
   * Requires careful management of the "State" object to prevent memory bloat in long conversations.
 ## Alternatives Considered
+* CrewAI relies on autonomous, heuristic reasoning that is simply too unpredictable for a high-stakes clinical environment where unskippable, sequential steps like Presidio redaction and prompt injection checks must be guaranteed every single time.
+* No-code platforms fail our core architectural requirement of local control because they force the upload of sensitive, unredacted patient PDFs to a third-party cloud environment before any security processing can occur, creating an unacceptable privacy risk.
 
