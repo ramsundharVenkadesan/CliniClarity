@@ -6,7 +6,7 @@
 ##  Context
 The CliniClarity application requires a sophisticated orchestration layer to manage interactions between LLMs (Gemini), vector databases (Pinecone), and external medical APIs (PubMed via MCP). A standard "black box" agent is insufficient for a medical context where reasoning steps must be transparent, secure, and highly controlled.
 
-## Detailed Rationale
+## Decision: Adopt LangChain and LangGraph
 We have selected LangChain for its extensive tool ecosystem and LangGraph for its ability to model the agent as a stateful, cyclic graph. 
 
 ### Framework Flow Diagram
