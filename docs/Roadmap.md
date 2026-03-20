@@ -4,19 +4,19 @@ This document outlines the technical evolution and upcoming deployment path for 
 
 ## 📅 Phase I: Foundations & Integration (February 2026)
 **Goal:** Establish the core reasoning loop and persistent memory layer.
- * [ ] **Initial Agent Build:** Developed the primary ReAct agent and RAG pipeline using plain LangChain to handle medical document queries
- * [ ] **API & Vector Layer:** Integrated FastAPI to serve the agent and transitioned memory to Pinecone for high-dimensional vector storage (1536-dim)
- * [ ] **Document Processing** Implemented RecursiveCharacterTextSplitter and Presidio-based PII redaction to ensure HIPAA-aligned data ingestion
+ * [X] **Initial Agent Build:** Developed the primary ReAct agent and RAG pipeline using plain LangChain to handle medical document queries
+ * [X] **API & Vector Layer:** Integrated FastAPI to serve the agent and transitioned memory to Pinecone for high-dimensional vector storage (1536-dim)
+ * [X] **Document Processing** Implemented RecursiveCharacterTextSplitter and Presidio-based PII redaction to ensure HIPAA-aligned data ingestion
 
 ## 🧠 Phase II: Architectural Evolution & Standardization (March 2026)
 **Goal:** Transition to stateful orchestration and standardized tool protocols.
- * [ ] **LangGraph Migration:** Refactored the linear RAG pipeline into a stateful graph using LangGraph, allowing for more complex multi-turn medical research cycles.
- * [ ] **Tool-Calling Upgrade:** Updated the manual ReAct logic to a modern Tool-Calling Agent pattern, improving the reliability of external API invocations.
- * [ ] **MCP Integrations:** Migrated the PubMed and Tavily search functionalities into a standalone Model Context Protocol (MCP) server, standardizing how the agent discovers and uses medical research tools.
+ * [X] **LangGraph Migration:** Refactored the linear RAG pipeline into a stateful graph using LangGraph, allowing for more complex multi-turn medical research cycles.
+ * [X] **Tool-Calling Upgrade:** Updated the manual ReAct logic to a modern Tool-Calling Agent pattern, improving the reliability of external API invocations.
+ * [X] **MCP Integrations:** Migrated the PubMed and Tavily search functionalities into a standalone Model Context Protocol (MCP) server, standardizing how the agent discovers and uses medical research tools.
 
 ## 🛡️ Phase III: Guardrails & Cloud Deployment (April - May 2026)
 **Goal:** Implement enterprise-grade security and automate infrastructure.
- * [ ] **Security Integration:** Deployed Protect AI to intercept and mitigate prompt injection attempts at the API gateway.
+ * [X] **Security Integration:** Deployed Protect AI to intercept and mitigate prompt injection attempts at the API gateway.
  * [ ] **Quality Assurance:** Integrated DeepEval into the pipeline to automate hallucination checking and enforce a high "Grounding Rate" for clinical summaries
  * [ ] **Infrastructure as Code (Next Step):** Transition the entire stack from local development to a production AWS environment using Terraform for automated provisioning
 
