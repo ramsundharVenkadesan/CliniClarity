@@ -23,25 +23,24 @@ graph LR
     
     style Local_Boundary fill:#f0f4f8,stroke:#005a9c,stroke-width:2px,stroke-dasharray: 5 5
 ```
-* **Detailed Rationale:**
-    1.  **Library Maturity (The Primary Driver):**
-        The core requirement is "coordinate-based redaction" (drawing shapes at specific X,Y locations).
-        * **Python:** The `PyMuPDF` library provides a robust `page.add_redact_annot()` method that physically removes underlying text and rasterizes the redaction area. This is critical for HIPAA compliance to prevent "copy-paste" leaks under black boxes.
-        * **Go:** While Go has PDF libraries (e.g., `unidoc`), they are often commercial/licensed or lack mature "destructive redaction" capabilities comparable to PyMuPDF's open-source feature set.
+## Detailed Rationale:
+* **Lightweight Implementation:** Presidio is a Python library that integrates directly into our existing Ingestion.py workflow without requiring heavy infrastructure overhead.
+* **No Third-Party Data Control:** By running the engine locally, sensitive medical data is never sent to a third-party redaction API (e.g., AWS Comprehend PII), ensuring we maintain a "Zero Trust" posture.
+* **Full Usage Control:** We have absolute authority over which "Recognizers" are active and how data is masked (e.g., replacing a name with [PATIENT] vs. completely removing it).
+* **Latency Optimization:** Eliminating network round-trips to external security APIs ensures the agent maintains the high-performance streaming required for real-time summaries.
+* **Cost-Effectiveness:** There are no per-request costs associated with local execution, which is critical for scaling an entry-level project into an enterprise-ready system.
+* **Custom Medical Recognizers:** We can extend Presidio with custom logic to detect specific clinical jargon or hospital-specific IDs that general-purpose tools might miss.
+* **Auditability and Logging:** Redaction events can be logged to our local activity.log for debugging without risk of leaking PII to cloud-based logging services.
 
-    2.  **AWS Integration:**
-        The `boto3` library in Python provides first-class support for the complex JSON structures returned by `Textract` and `ComprehendMedical`. Parsing nested JSON blocks for "BoundingBox" geometries is significantly more verbose in Go (requires struct mapping) compared to Python's dynamic dict handling.
+## Consequences
+* **Advantages**:
+    * Maximum data privacy for healthcare compliance.
+    * Reduced cloud service dependencies.
+    * Enhanced "Security Architect" profile for the project portfolio.
+* **Disadvantages:**
+    * Local CPU/RAM usage increases during document ingestion.
+    * Requires manual updates to Presidio's detection models to stay current with new PII patterns.
 
-    3.  **Prototyping Velocity:**
-        Python allowed for rapid iteration of the "OCR-to-Redaction" loop. Given the strict deadline for the MVP, the development speed of Python outweighed the execution speed of Go.
-
-* **Consequences:**
-    * **Positive:**
-        * **Code Simplicity:** The entire redaction logic fits in approximately 50 lines of code, making it highly maintainable.
-        * **Maintenance:** Future engineers (or data scientists) can easily modify the logic as Python is the standard language for AI/ML pipelines.
-    * **Negative:**
-        * **Cold Start Latency:** Python runtimes on AWS Lambda have slower cold starts than Go.
-        * **Deployment Size:** The `PyMuPDF` library requires binary dependencies (`manylinux` wheels), increasing the Lambda package size.
-    * **Mitigation Strategy:**
-        * We implemented **AWS Lambda Layers** in Terraform (`main.tf`) to isolate the heavy `PyMuPDF` dependency from the application logic. This keeps the function deployment lightweight and allows for caching the layer.
-        * We pinned the Python version to `3.8` and utilized `manylinux2014_x86_64` wheels to ensure binary compatibility with the AWS Lambda environment.
+## Alternative Considerations
+* **AWS Comprehend PII:** Rejected due to external data transit and per-token costs.
+* **Manual Regex Redaction:** Rejected as it is too brittle for complex medical reports and fails to catch context-based PII.
