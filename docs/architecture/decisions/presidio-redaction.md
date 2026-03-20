@@ -1,19 +1,28 @@
-# ADR 002: Adoption of Python Runtime for PDF Redaction Service
+# Architecture Decision Record: Local PII Redaction with Microsoft Presidio
 
 * **Status:** Accepted
 * **Date:** 2026-02-09
-* **Context:**
-    The CliniClarity platform requires a "Redaction Service" to sanitize Protected Health Information (PHI) from patient documents. The workflow involves:
-    1.  Ingesting raw PDFs from S3.
-    2.  Extracting text coordinates using AWS Textract.
-    3.  Identifying PHI entities using Amazon Comprehend Medical.
-    4.  **Drawing permanent black boxes** over specific coordinates in the original PDF file to ensure non-reversible redaction.
 
-    We evaluated **Go** and **Python** for the AWS Lambda runtime to handle this specific task.
+## Context
+The CliniClarity agent processes sensitive medical reports (PDFs) that contain Personally Identifiable Information (PII) such as patient names, dates of birth, and medical record numbers. To ensure privacy and security, this data must be redacted before it is sent to external LLMs (Gemini) or stored in cloud vector databases (Pinecone).
 
-* **Decision:**
-    We will use **Python 3.8** for the Redaction Lambda function, utilizing the `PyMuPDF` (fitz) library for PDF manipulation and `boto3` for AWS SDK interactions.
-
+## Decision: Use Microsoft Presidio for Local Redaction
+We will implement **Microsoft Presidio** as a Python-based library running directly on the local machine (or within our private AWS EC2 instances) to handle all anonymization tasks.
+### Architecture Diagram
+```mermaid
+graph LR
+    A[User Document] --> B[FastAPI Ingestion]
+    subgraph Local_Boundary [Local/Private Environment]
+        B --> C{Presidio Engine}
+        C --> D[Analyzer: Detect PII]
+        D --> E[Anonymizer: Mask Data]
+    end
+    E --> F[Redacted Text]
+    F --> G[Pinecone Vector DB]
+    F --> H[Gemini LLM]
+    
+    style Local_Boundary fill:#f0f4f8,stroke:#005a9c,stroke-width:2px,stroke-dasharray: 5 5
+```
 * **Detailed Rationale:**
     1.  **Library Maturity (The Primary Driver):**
         The core requirement is "coordinate-based redaction" (drawing shapes at specific X,Y locations).
