@@ -1,7 +1,7 @@
 # Architecture Decision Record: Real-time Prompt Security with Protect AI Guardian
 
 * **Status:** Accepted
-* **Date:** 2026-03-22
+* **Date:** 2026-02-26
 
 ## Context
 As CliniClarity moves toward production, the risk of Prompt Injection (LLM01) and accidental Sensitive Information Disclosure (LLM06) poses a significant threat to our security posture. In a healthcare context, a malicious or accidental input that bypasses safety filters could lead to unauthorized data access or the bypass of medical guardrails. We need a high-performance, scalable solution to audit prompts before they reach the core LLM logic.
