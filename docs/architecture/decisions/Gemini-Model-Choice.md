@@ -1,7 +1,7 @@
 # Architecture Decision Record: LLM Selection for Medical Summarization and Q&A
 
 * **Status:** Accepted
-* **Date:** 2026-03-22
+* **Date:** 2026-02-22
 
 ## Context
 CliniClarity requires a core LLM engine to perform two critical tasks: summarizing complex medical reports and answering patient queries with high precision. In a healthcare environment, the engine must not only be accurate but also provide structured outputs (JSON/Schema) that can be reliably parsed by the downstream PII redaction (Microsoft Presidio) and hallucination auditing (DeepEval) layers.
