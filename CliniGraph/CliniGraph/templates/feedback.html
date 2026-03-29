@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CliniClarity | Experience Feedback</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        clarity: {
+                            shell: '#f4efe7',
+                            ink: '#112031',
+                            slate: '#5c6670',
+                            line: '#d8d2c8',
+                            panel: 'rgba(255, 255, 255, 0.82)',
+                            accent: '#0f766e',
+                            accentSoft: '#ccfbf1',
+                            success: '#166534'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Avenir Next"', '"Segoe UI"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    </style>
+</head>
+<body class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(15,118,110,0.18),_transparent_28%),linear-gradient(180deg,_#f7f3ec_0%,_#efe8dc_100%)] text-clarity-ink font-sans">
+    <main class="max-w-6xl mx-auto px-6 py-10 md:py-16">
+        <div class="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] items-start">
+            <section class="bg-clarity-panel backdrop-blur-xl border border-white/60 rounded-[2rem] shadow-[0_24px_80px_rgba(17,32,49,0.08)] p-8 md:p-10">
+                <p class="text-[12px] font-semibold uppercase tracking-[0.24em] text-clarity-slate">Customer Feedback</p>
+                <h1 class="mt-3 text-4xl md:text-5xl font-semibold tracking-tight">How did CliniClarity feel to use?</h1>
+                <p class="mt-4 text-lg leading-8 text-clarity-slate max-w-2xl">
+                    This page simulates the customer experience after finishing a session. Pick a score, leave a quick note, and submit.
+                </p>
+
+                <section class="mt-10 rounded-[1.75rem] bg-white/90 border border-clarity-line p-6 md:p-8">
+                    <div class="flex items-center justify-between gap-4 flex-wrap">
+                        <div>
+                            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-clarity-slate">Step 1</p>
+                            <h2 class="mt-2 text-2xl font-semibold">Rate the experience</h2>
+                        </div>
+                        <p id="selectedLabel" class="text-sm text-clarity-slate">No rating selected</p>
+                    </div>
+
+                    <div class="mt-6 grid grid-cols-5 gap-3">
+                        <button type="button" data-rating="1" class="rating-btn rounded-[1.25rem] border border-clarity-line bg-white px-4 py-5 text-center transition-all hover:border-clarity-accent hover:bg-clarity-accentSoft">
+                            <span class="block text-2xl font-semibold">1</span>
+                            <span class="mt-1 block text-xs uppercase tracking-[0.16em] text-clarity-slate">Poor</span>
+                        </button>
+                        <button type="button" data-rating="2" class="rating-btn rounded-[1.25rem] border border-clarity-line bg-white px-4 py-5 text-center transition-all hover:border-clarity-accent hover:bg-clarity-accentSoft">
+                            <span class="block text-2xl font-semibold">2</span>
+                            <span class="mt-1 block text-xs uppercase tracking-[0.16em] text-clarity-slate">Rough</span>
+                        </button>
+                        <button type="button" data-rating="3" class="rating-btn rounded-[1.25rem] border border-clarity-line bg-white px-4 py-5 text-center transition-all hover:border-clarity-accent hover:bg-clarity-accentSoft">
+                            <span class="block text-2xl font-semibold">3</span>
+                            <span class="mt-1 block text-xs uppercase tracking-[0.16em] text-clarity-slate">Okay</span>
+                        </button>
+                        <button type="button" data-rating="4" class="rating-btn rounded-[1.25rem] border border-clarity-line bg-white px-4 py-5 text-center transition-all hover:border-clarity-accent hover:bg-clarity-accentSoft">
+                            <span class="block text-2xl font-semibold">4</span>
+                            <span class="mt-1 block text-xs uppercase tracking-[0.16em] text-clarity-slate">Good</span>
+                        </button>
+                        <button type="button" data-rating="5" class="rating-btn rounded-[1.25rem] border border-clarity-line bg-white px-4 py-5 text-center transition-all hover:border-clarity-accent hover:bg-clarity-accentSoft">
+                            <span class="block text-2xl font-semibold">5</span>
+                            <span class="mt-1 block text-xs uppercase tracking-[0.16em] text-clarity-slate">Great</span>
+                        </button>
+                    </div>
+
+                    <div class="mt-8">
+                        <label for="comment" class="block text-sm font-semibold uppercase tracking-[0.18em] text-clarity-slate">Step 2</label>
+                        <h3 class="mt-2 text-2xl font-semibold">Tell us what stood out</h3>
+                        <textarea id="comment" rows="5" maxlength="1000" class="mt-4 w-full rounded-[1.5rem] border border-clarity-line bg-[#fcfaf7] px-5 py-4 text-base outline-none transition focus:border-clarity-accent focus:ring-4 focus:ring-clarity-accent/10" placeholder="Examples: It felt fast. The summary was reassuring. I wasn't sure what to do next."></textarea>
+                    </div>
+
+                    <div class="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
+                        <button id="submitBtn" type="button" class="rounded-full bg-clarity-accent px-6 py-3.5 text-white font-semibold shadow-[0_12px_30px_rgba(15,118,110,0.22)] transition-transform active:scale-[0.98]">
+                            Submit feedback
+                        </button>
+                        <p id="status" class="text-sm text-clarity-slate"></p>
+                    </div>
+
+                    <div id="thankYouCard" class="hidden mt-8 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 px-5 py-4 text-clarity-success">
+                        Thanks. Your feedback was recorded.
+                    </div>
+                </section>
+            </section>
+
+            <aside class="bg-[#112031] text-white rounded-[2rem] shadow-[0_24px_80px_rgba(17,32,49,0.18)] p-8 md:p-10">
+                <p class="text-[12px] font-semibold uppercase tracking-[0.24em] text-white/60">Live Summary</p>
+                <h2 class="mt-3 text-3xl font-semibold tracking-tight">What feedback looks like</h2>
+                <p class="mt-3 text-white/70 leading-7">
+                    This side shows what the service has collected so far, so you can see the product from both the customer and operator view.
+                </p>
+
+                <div class="mt-8 grid grid-cols-2 gap-4">
+                    <div class="rounded-[1.5rem] bg-white/8 border border-white/10 p-5">
+                        <p class="text-sm text-white/60">Average rating</p>
+                        <p id="averageRating" class="mt-2 text-4xl font-semibold">0.0</p>
+                    </div>
+                    <div class="rounded-[1.5rem] bg-white/8 border border-white/10 p-5">
+                        <p class="text-sm text-white/60">Responses</p>
+                        <p id="totalResponses" class="mt-2 text-4xl font-semibold">0</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 rounded-[1.5rem] bg-white/8 border border-white/10 p-5">
+                    <p class="text-sm text-white/60">Distribution</p>
+                    <div id="distribution" class="mt-4 space-y-3"></div>
+                </div>
+
+                <div class="mt-6 rounded-[1.5rem] bg-white/8 border border-white/10 p-5">
+                    <p class="text-sm text-white/60">Recent comments</p>
+                    <div id="recentFeedback" class="mt-4 space-y-3 text-sm text-white/80"></div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <script>
+        const labels = {
+            1: '1 / 5 - Poor',
+            2: '2 / 5 - Rough',
+            3: '3 / 5 - Okay',
+            4: '4 / 5 - Good',
+            5: '5 / 5 - Great'
+        };
+
+        let selectedRating = 0;
+
+        function updateSelectedRating(rating) {
+            selectedRating = rating;
+            document.getElementById('selectedLabel').textContent = labels[rating];
+
+            document.querySelectorAll('.rating-btn').forEach((button) => {
+                const isActive = Number(button.dataset.rating) === rating;
+                button.classList.toggle('bg-clarity-accent', isActive);
+                button.classList.toggle('border-clarity-accent', isActive);
+                button.classList.toggle('text-white', isActive);
+                button.querySelectorAll('span').forEach((span) => {
+                    span.classList.toggle('text-white', isActive);
+                    span.classList.toggle('text-clarity-slate', !isActive && span.classList.contains('text-clarity-slate'));
+                });
+            });
+        }
+
+        function renderDistribution(distribution) {
+            const container = document.getElementById('distribution');
+            container.innerHTML = '';
+
+            [5, 4, 3, 2, 1].forEach((rating) => {
+                const count = distribution[String(rating)] || 0;
+                const row = document.createElement('div');
+                row.className = 'grid grid-cols-[2rem_1fr_2rem] items-center gap-3';
+                row.innerHTML = `
+                    <span class="text-white/70">${rating}</span>
+                    <div class="h-2 rounded-full bg-white/10 overflow-hidden">
+                        <div class="h-full rounded-full bg-teal-300" style="width: ${Math.min(count * 18, 100)}%"></div>
+                    </div>
+                    <span class="text-right text-white/70">${count}</span>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function renderRecentFeedback(items) {
+            const container = document.getElementById('recentFeedback');
+            container.innerHTML = '';
+
+            if (!items.length) {
+                container.innerHTML = '<p class="text-white/55">No feedback yet.</p>';
+                return;
+            }
+
+            items.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = 'rounded-[1rem] bg-white/6 border border-white/10 p-4';
+                const comment = item.comment ? item.comment : 'No comment left.';
+                card.innerHTML = `
+                    <p class="text-white font-medium">${item.rating} / 5</p>
+                    <p class="mt-2 text-white/75 leading-6">${comment}</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function loadSummary() {
+            const response = await fetch('/feedback/experience/summary');
+            const data = await response.json();
+
+            document.getElementById('averageRating').textContent = Number(data.average_rating).toFixed(1);
+            document.getElementById('totalResponses').textContent = data.total_responses;
+            renderDistribution(data.distribution);
+            renderRecentFeedback(data.recent_feedback);
+        }
+
+        async function submitFeedback() {
+            const status = document.getElementById('status');
+            const comment = document.getElementById('comment').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (!selectedRating) {
+                status.textContent = 'Select a rating first.';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            status.textContent = 'Sending feedback...';
+
+            try {
+                const response = await fetch('/feedback/experience', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        rating: selectedRating,
+                        comment: comment,
+                        context: 'customer-feedback-page'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Request failed');
+                }
+
+                document.getElementById('thankYouCard').classList.remove('hidden');
+                document.getElementById('comment').value = '';
+                status.textContent = 'Feedback submitted.';
+                await loadSummary();
+            } catch (error) {
+                status.textContent = 'Could not submit feedback.';
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
+        document.querySelectorAll('.rating-btn').forEach((button) => {
+            button.addEventListener('click', () => updateSelectedRating(Number(button.dataset.rating)));
+        });
+
+        document.getElementById('submitBtn').addEventListener('click', submitFeedback);
+
+        loadSummary().catch(() => {
+            document.getElementById('status').textContent = 'Could not load feedback summary.';
+        });
+    </script>
+</body>
+</html>

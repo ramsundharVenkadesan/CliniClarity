@@ -1,11 +1,12 @@
 import markdown, tempfile, json
+from pathlib import Path
 from fastapi import APIRouter, UploadFile, HTTPException, Request, Form
 from fastapi.responses import StreamingResponse
 from starlette.templating import Jinja2Templates
 from Agent.RAG_Graph.Workflow import rag_app # Import the complied graph
 
 rag_router = APIRouter(tags=["Summary"], prefix="/summary")
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
 
 
 @rag_router.post("/") # Post request from the end-user
@@ -40,7 +41,7 @@ async def generate_summary(
                 if current_state.get("status"): # Graph execution is done
                     html_markdown = markdown.markdown(current_state["summary"]) # Extract the final generated summary from the state-graph
 
-                    template_response = templates.TemplateResponse("report.html", {
+                    template_response = templates.TemplateResponse(request, "report.html", {
                         "request": request,
                         "summary_html": html_markdown,
                         "chunks": len(current_state.get("documents", [])),

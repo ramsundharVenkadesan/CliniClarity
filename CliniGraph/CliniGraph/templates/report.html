@@ -89,6 +89,34 @@
                     <span>Chunks: {{ chunks }}</span>
                     <span>PHI Redacted</span>
                 </footer>
+
+                <section class="mt-8 bg-white/80 dark:bg-[#1C1C1E]/80 border border-black/5 dark:border-white/10 rounded-[1.75rem] p-6">
+                    <div class="flex flex-col gap-3">
+                        <div>
+                            <p class="text-[11px] uppercase tracking-[0.2em] text-apple-textMuted font-semibold">Experience Rating</p>
+                            <h2 class="text-xl font-semibold text-black dark:text-white mt-2">How was this experience?</h2>
+                            <p class="text-[15px] text-apple-textMuted mt-1">Send a quick rating so this can be tracked like a small feedback microservice.</p>
+                        </div>
+
+                        <div id="ratingButtons" class="flex flex-wrap gap-3">
+                            <button type="button" data-rating="1" class="rating-btn px-4 py-2.5 rounded-full border border-[#D1D1D6] dark:border-[#3A3A3C] text-sm font-medium text-black dark:text-white transition-colors">1</button>
+                            <button type="button" data-rating="2" class="rating-btn px-4 py-2.5 rounded-full border border-[#D1D1D6] dark:border-[#3A3A3C] text-sm font-medium text-black dark:text-white transition-colors">2</button>
+                            <button type="button" data-rating="3" class="rating-btn px-4 py-2.5 rounded-full border border-[#D1D1D6] dark:border-[#3A3A3C] text-sm font-medium text-black dark:text-white transition-colors">3</button>
+                            <button type="button" data-rating="4" class="rating-btn px-4 py-2.5 rounded-full border border-[#D1D1D6] dark:border-[#3A3A3C] text-sm font-medium text-black dark:text-white transition-colors">4</button>
+                            <button type="button" data-rating="5" class="rating-btn px-4 py-2.5 rounded-full border border-[#D1D1D6] dark:border-[#3A3A3C] text-sm font-medium text-black dark:text-white transition-colors">5</button>
+                        </div>
+
+                        <label for="ratingComment" class="text-[13px] font-medium text-black dark:text-white">Optional comment</label>
+                        <textarea id="ratingComment" rows="3" maxlength="1000" class="w-full rounded-[1.25rem] bg-apple-bgLight dark:bg-[#2C2C2E] border border-transparent focus:border-apple-blue focus:ring-4 focus:ring-apple-blue/10 outline-none transition-all px-4 py-3 text-[15px] text-black dark:text-white placeholder-[#8E8E93]" placeholder="What worked well or felt rough?"></textarea>
+
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                            <button type="button" id="submitRatingBtn" class="w-full sm:w-auto bg-apple-blue text-white font-semibold text-[15px] py-3 px-5 rounded-full transition-transform active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed">
+                                Submit rating
+                            </button>
+                            <p id="ratingStatus" class="text-[14px] text-apple-textMuted"></p>
+                        </div>
+                    </div>
+                </section>
             </article>
 
             <aside class="w-full lg:w-[400px] xl:w-[450px] shrink-0 sticky top-6 z-10">
@@ -130,6 +158,55 @@
         if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
 
         const currentModelSelection = "{{ llm_selection }}";
+        let selectedRating = 0;
+
+        function updateRatingSelection(rating) {
+            selectedRating = rating;
+            document.querySelectorAll('.rating-btn').forEach((button) => {
+                const isSelected = Number(button.dataset.rating) === rating;
+                button.classList.toggle('bg-apple-blue', isSelected);
+                button.classList.toggle('text-white', isSelected);
+                button.classList.toggle('border-apple-blue', isSelected);
+            });
+            document.getElementById('ratingStatus').textContent = '';
+        }
+
+        async function submitExperienceRating() {
+            const status = document.getElementById('ratingStatus');
+            const button = document.getElementById('submitRatingBtn');
+            const comment = document.getElementById('ratingComment').value.trim();
+
+            if (!selectedRating) {
+                status.textContent = 'Choose a rating first.';
+                return;
+            }
+
+            button.disabled = true;
+            status.textContent = 'Saving rating...';
+
+            try {
+                const response = await fetch('/feedback/experience', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        rating: selectedRating,
+                        comment: comment,
+                        context: 'report'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Request failed');
+                }
+
+                status.textContent = 'Thanks. Rating saved.';
+                document.getElementById('ratingComment').value = '';
+            } catch (error) {
+                status.textContent = 'Could not save rating.';
+            } finally {
+                button.disabled = false;
+            }
+        }
 
         async function askAgent() {
             const question = document.getElementById('userQuestion').value;
@@ -180,6 +257,12 @@
         document.getElementById("userQuestion").addEventListener("keypress", function(event) {
           if (event.key === "Enter") { event.preventDefault(); document.getElementById("askBtn").click(); }
         });
+
+        document.querySelectorAll('.rating-btn').forEach((button) => {
+            button.addEventListener('click', () => updateRatingSelection(Number(button.dataset.rating)));
+        });
+
+        document.getElementById('submitRatingBtn').addEventListener('click', submitExperienceRating);
     </script>
 </body>
 </html>
