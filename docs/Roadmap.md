@@ -17,7 +17,7 @@ This document outlines the technical evolution and upcoming deployment path for 
 ## 🛡️ Phase III: Guardrails & Cloud Deployment (April - May 2026)
 **Goal:** Implement enterprise-grade security and automate infrastructure.
  * [X] **Security Integration:** Deployed Protect AI to intercept and mitigate prompt injection attempts at the API gateway.
- * [ ] **Quality Assurance:** Integrated DeepEval into the pipeline to automate hallucination checking and enforce a high "Grounding Rate" for clinical summaries
+ * [X] **Quality Assurance:** Integrated DeepEval into the pipeline to automate hallucination checking and enforce a high "Grounding Rate" for clinical summaries
  * [ ] **Infrastructure as Code (Next Step):** Transition the entire stack from local development to a production AWS environment using Terraform for automated provisioning
 
 ## 📊 Success Milestones
