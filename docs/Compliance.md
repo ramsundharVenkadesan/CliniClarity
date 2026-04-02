@@ -1,31 +1,31 @@
-# Compliance & Data Privacy: HIPAA Framework
-CliniClarity is built with a "Privacy by Design" philosophy, ensuring that patient trust is maintained through rigorous automated security protocols and high-authority data grounding
+# CliniClarity: Security & Compliance Architecture
+**Objective:** To establish a deterministic, zero-trust security posture for the processing of medical documents and generation of clinical summaries
 
 ---
 
-## PHI & PII Safeguards (The Redaction Pipeline)
-To ensure that sensitive information is never leaked to public Large Language Models (LLMs) or used for training, we implement a multi-stage sanitization pipeline.
-* **Localized Redaction:** Every uploaded document is processed by Microsoft Presidio. Unlike cloud-based PII services, this engine runs natively on our EC2 nodes, identifying 18+ types of Protected Health Information (PHI) including names, MRNs, and contact details before any data is vectorized.
-* **Irreversible Scrubbing:** Once identified, the PHI is scrubbed from the text in-memory. This ensure that only the anonymized clinical context is passed to the embedding engine, effectively creating a "Safe Harbor" for patient data.
-* **Memory-Only Processing:** Raw, unredacted text is never written to persistent storage in a searchable format; it exists only in a transient state during the redaction phase.
+## Zero-Trust Ingress (Layer 0 & 1)
+CliniClarity operates under the assumption that all user input is potentially hostile or irrelevant. We employ a multi-tiered ingress defense mechanism before any data enters the cognitive pipeline.
+* **The Medical Gatekeeper (Tier 0):** A two-stage validation process blocks non-clinical data. A fast heuristic scan checks for medical markers, followed by a lightweight LLM validation. If a user uploads a non-medical document (e.g., a recipe or malicious script), the stream is gracefully terminated, preventing vector database pollution and API waste.
+* **Local Adversarial Defense (Tier 1):** Before the LangChain orchestrator receives the document, the text is scanned by a localized Hugging Face Small Language Model (ProtectAI DeBERTa). This model acts as a physical firewall, detecting and blocking prompt injections, DAN attacks, and jailbreak attempts with microsecond latency.
+* **Prompt Sandboxing:** All extracted clinical text is strictly isolated within XML delimiters (`<clinical_data>`). The agent is explicitly instructed to treat any commands found within these delimiters as untrusted plain text, neutralizing embedded system overrides.
 
 ---
 
-## Technical Safeguards (AWS Infrastructure)
-The infrastructure is designed to physically and logically separate sensitive ingestion from the reasoning environment.
-* **VPC Isolation:** All reasoning and redaction nodes are isolated within Private Subnets with zero public ingress. All external traffic is routed through a central Application Load Balancer (ALB) and a NAT Gateway, providing a single, auditable point of egress.
-* **Vector Security:** Sanitized clinical embeddings are stored in Pinecone. Access is controlled via strictly scoped API keys and IAM roles, ensuring that the "Principle of Least Privilege" is applied to the data retrieval layer.
-* **Encryption at Rest & In-Transit:** All data is encrypted at rest using AES-256 (EBS volumes and Pinecone indices) and in-transit via TLS 1.2+ for all API communication with Gemini and PubMed
+## Cognitive Security & Grounding (The AI Orchestrator)
+The core reasoning engine (LangGraph) has been heavily modified to prioritize deterministic execution over probabilistic guessing.
+* **Native JSON Tool Calling:** We have deprecated legacy text-parsing ReAct frameworks. The agent communicates with tools using strictly typed JSON schemas. This prevents tool hijacking and ensures the agent cannot execute arbitrary code or unauthorized system commands.
+* **Objective Hallucination Auditing:** Utilizing DeepEval, every clinical synthesis is objectively scored against the retrieved document context. The system is physically incapable of finalizing a summary if the hallucination threshold is breached.
+* **Clinical Verification via FastMCP:** General web search is disabled. When the agent requires external medical verification, it queries the National Library of Medicine (PubMed) via a localized Model Context Protocol (MCP) server running over strictly controlled stdio pipes
+* **The Reflection Agent:** A self-correcting cognitive loop audits the draft summary for patient readability and empathetic tone. To prevent infinite loops, this node is strictly capped at a maximum of 3 retries.
 
 ---
 
-## Clinical Safety & Hallucination Mitigation
-Beyond data privacy, "Compliance" in medical PLM includes the safety and accuracy of the information provided to the user.
-* **Grounded RAG:** The LangGraph engine is restricted to providing answers found only in the provided records or vetted clinical journals.
-* **Automated Auditing:** We utilize **DeepEval** as a deterministic clinical auditor. Every response is measured for "Faithfulness" and "Answer Relevancy" against the source document. If a response fails these metrics, the state machine triggers a self-correction loop.
-* **Non-Diagnostic Intent:** The system is explicitly engineered as a "Research Librarian," prioritizing evidence-based education over diagnostic prescription.
+## Zero-Trust Egress (Data Exfiltration & Safety)
+Securing the output is just as critical as securing the input. CliniClarity employs a "Circuit Breaker" architecture to intercept compromised responses.
+* **Intrinsic Safety Alignment:** By neutralizing external payload injections at the ingress point (via DeBERTa) and explicitly removing code-execution tools from the reasoning environment, CliniClarity safely leverages the core LLM to generate clinical summaries without requiring a heavy, resource-intensive egress-evaluation model.
+* **Double-Pass PII Redaction:** Microsoft Presidio is implemented on both the ingress and egress nodes. It redacts Protected Health Information (PHI) before it is sent to the LLM, and scans the final output to ensure no hallucinations have leaked synthetic or real identifiers.
 
-## Auditability & Transparency
+## Operational Resilience
 Transparency ensures that every claim made by the AI can be verified by a human healthcare professional.
-* **Direct Citations:** Every summary statement is linked to a specific line in the patient's record or a specific DOI (Digital Object Identifier).
-* **Source Verification:** This allows patients to bring evidence-based questions to their doctors, facilitating more productive and efficient consultations
+* **Semantic Caching:** Redundant queries are intercepted by a local caching layer, significantly reducing API latency and preventing unnecessary token expenditure for standard medical definitions.
+* **Graceful SSE Error Handling:** All security intercepts (Ingress blocks, Egress blocks, Validation failures) are natively mapped to Server-Sent Events (SSE). The system never crashes; instead, it streams formatted JSON errors that the frontend gracefully displays to the user.
