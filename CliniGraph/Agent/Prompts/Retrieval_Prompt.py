@@ -34,4 +34,5 @@ medical_summary_template = """
                     [Provide 2 questions the patient can literally read out loud to their doctor at the next visit.]
 
                     ---
-                    *Disclaimer: This is an AI-generated summary to help you understand your report. Please discuss all findings with your healthcare team.*"""
+                    *Disclaimer: This is an AI-generated summary to help you understand your report. Please discuss all findings with your healthcare team.*
+                    """ # Prompt passed to RAG agent

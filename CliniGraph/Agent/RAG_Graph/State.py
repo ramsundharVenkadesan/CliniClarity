@@ -9,6 +9,6 @@ class GraphState(TypedDict): # Typed-Dictionary class to maintain and hold state
     context:List[str] # Relevant-Chunks retrieved from a vector database to generate a summary
     evaluation_score:float # A floating-point score assigned to the generated summary based on the input PDF
     run_eval:bool # Toggle to execute Deep-Eval on summary generation (increases execution time)
-    is_cached: bool
-    pdf_text:str
-    doc_hash:str
+    is_cached: bool # Property to maintain caching
+    pdf_text:str # Property to extract PDF text data
+    doc_hash:str # Property to store unique document hash

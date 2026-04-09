@@ -4,9 +4,30 @@ from fastapi.responses import StreamingResponse
 from starlette.templating import Jinja2Templates
 from Agent.RAG_Graph.Workflow import rag_app # Import the complied graph
 from pypdf import PdfReader
+from Agent.Security.Validation import *
+from transformers import pipeline
+
 rag_router = APIRouter(tags=["Summary"], prefix="/summary")
 templates = Jinja2Templates(directory="templates")
-from Agent.Security.Validation import *
+
+ingress_scanner = pipeline(
+    "text-classification",
+    model="protectai/deberta-v3-base-prompt-injection-v2"
+)
+
+
+async def scan_for_prompt_injection(text: str) -> bool:
+    """Scans the uploaded document for malicious prompt injections."""
+    # We only scan the first 1000 characters to keep it fast
+    result = ingress_scanner(text[:1000], truncation=True, max_length=512)
+    label = result[0]['label']
+    score = result[0]['score']
+
+    # If the model is highly confident it's an injection, block it
+    if label == "INJECTION" and score > 0.8:
+        print(f"🚨 INGRESS FIREWALL TRIGGERED: {score} confidence.")
+        return True
+    return False
 
 
 @rag_router.post("/") # Post request from the end-user
@@ -41,11 +62,12 @@ async def generate_summary(
                     yield f"data: {json.dumps({'type': 'error', 'message': error_msg})}\n\n"
                     return  # Exit the generator immediately; the LangGraph will NOT run
 
-                # ==========================================
-                # 🧠 TIER 3: AI GRAPH EXECUTION
-                # ==========================================
+                yield f"data: {json.dumps({'type': 'status', 'step': 'Scanning for Cyber Threats...'})}\n\n"
+                is_attack = await scan_for_prompt_injection(first_page_text)
 
-                # Setup the LangGraph State
+                if is_attack:
+                    yield f"data: {json.dumps({'type': 'error', 'message': 'Security Alert: Malicious prompt injection detected in document.'})}\n\n"
+                    return  # Kills the stream BEFORE LangGraph ever runs!
                 initial_state = {
                     "file_path": pdf_path,
                     "status": True,
@@ -62,7 +84,8 @@ async def generate_summary(
                         current_state.update(state_update) # Update the dictionary instead of overwriting
 
                 if current_state.get("status"): # Graph execution is done
-                    html_markdown = markdown.markdown(current_state["summary"]) # Extract the final generated summary from the state-graph
+                    draft_response = current_state["summary"]
+                    html_markdown = markdown.markdown(draft_response) # Extract the final generated summary from the state-graph
 
                     template_response = templates.TemplateResponse("report.html", {
                         "request": request,

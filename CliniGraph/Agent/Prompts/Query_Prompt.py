@@ -19,4 +19,4 @@ You MUST append a clean sources section at the very end of your final response u
 * **PubMed Medical Journal:** (State the title of the article or the medical topic researched)
 
 Begin!
-"""
+""" # Prompt passed to the ReACT agent
