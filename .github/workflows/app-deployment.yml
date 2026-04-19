@@ -1,11 +1,8 @@
 name: Deploy CliniGraph App
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'CliniGraph/**' # Only runs if application code changes
+  workflow_dispatch:
+
 
 permissions:
   id-token: write
