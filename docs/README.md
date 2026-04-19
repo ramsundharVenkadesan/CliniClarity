@@ -139,73 +139,111 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 The application is deployed directly to high-performance EC2 instances within a hardened AWS environment, utilizing an Auto Scaling Group (ASG) for high availability and tiered subnets for data isolation.
 
 ```mermaid
-flowchart LR
+graph TD
+    %% Styling
+    classDef gcp fill:#4285F4,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef storage fill:#FBBC05,stroke:#fff,stroke-width:2px,color:#000;
+    classDef security fill:#8F00FF,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef external fill:#34A853,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef public fill:#EA4335,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef config fill:#607D8B,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef apis fill:#A142F4,stroke:#fff,stroke-width:1px,color:#fff;
 
-%% USER
-U((Patient / User)):::userNode
+    %% ===== EXTERNAL ENTITIES =====
+    Users("🌍 End Users<br/><br/>Web Browser Access"):::public
 
-%% VPC
-subgraph VPC [AWS VPC]
-
-    %% PUBLIC SUBNET
-    subgraph PublicSubnet [PUBLIC SUBNET - DMZ]
+    subgraph ThirdParty["🔌 External APIs & Services"]
         direction TB
-        ALB[Application Load Balancer]:::resource
-        NAT[NAT Gateway]:::resource
+        Pinecone["<b>Pinecone</b><br/>Vector Database<br/>━━━━━━━━━━<br/>Index: cliniclarity<br/>Dimension: 1536<br/>Type: Serverless"]:::external
+        LangChain["<b>LangSmith</b><br/>LLM Observability<br/>━━━━━━━━━━<br/>Endpoint: api.smith.langchain.com<br/>Project: cliniclarity-production"]:::external
+        HuggingFace["<b>Hugging Face</b><br/>Model Inference<br/>━━━━━━━━━━<br/>Token Auth Required"]:::external
+        GoogleAI["<b>Google AI</b><br/>GenAI & Core APIs<br/>━━━━━━━━━━<br/>API Key Auth"]:::external
     end
 
-    %% PRIVATE SUBNET
-    subgraph PrivateSubnet [PRIVATE SUBNET - HIPAA ZONE]
+    subgraph GCP["<b>Google Cloud Platform</b><br/>Project: cliniclarity | Region: us-central1"]
         direction TB
         
-        subgraph ASG [Auto Scaling Group - CliniClarity Node Cluster]
-            direction TB
-            EC2_A[[EC2 Agent Node A]]:::instance
-            EC2_B[[EC2 Agent Node B]]:::instance
-            EC2_C[[EC2 Agent Node C]]:::instance
+        %% ===== API LAYER =====
+        subgraph EnabledAPIs["📋 Enabled Google Cloud APIs"]
+            APIList["Compute Engine API<br/>Cloud Storage API<br/>Cloud KMS API<br/>Cloud Run API<br/>Firebase API<br/>Identity Platform API"]:::apis
         end
 
-        VDB[(Pinecone Vector DB)]:::database
+        %% ===== IDENTITY & AUTH =====
+        subgraph Identity["🔐 Identity & Access"]
+            direction LR
+            ServiceAccount["<b>Application Service Account</b><br/>━━━━━━━━━━━━━━<br/>cliniclarity-app-service<br/>Runtime identity for Cloud Run"]:::security
+            StorageSA["<b>Storage Service Agent</b><br/>━━━━━━━━━━━━━━<br/>GCS-managed service account<br/>Handles bucket encryption"]:::security
+        end
+
+        subgraph Firebase["🔥 Firebase & Authentication"]
+            direction LR
+            FirebaseProj["<b>Firebase Project</b><br/>━━━━━━━━━━━━━━<br/>Backend services"]:::security
+            WebClient["<b>Web Application</b><br/>━━━━━━━━━━━━━━<br/>CliniClarity Web App<br/>Firebase SDK client"]:::security
+            AuthMethods["<b>Authentication Methods</b><br/>━━━━━━━━━━━━━━<br/>✓ Email / Password<br/>✓ Google Sign-In"]:::security
+            FirebaseProj --- WebClient
+            FirebaseProj --- AuthMethods
+        end
+
+        %% ===== COMPUTE =====
+        subgraph Compute["⚙️ Compute Layer"]
+            CloudRunService["<b>Cloud Run Service</b><br/>━━━━━━━━━━━━━━<br/>Container: cliniclarity-app:latest<br/>Port: 8080<br/>Ingress: All traffic allowed"]:::gcp
+            
+            subgraph EnvConfig["📦 Container Environment"]
+                EnvVars["<b>Runtime Configuration</b><br/>━━━━━━━━━━━━━━<br/>GOOGLE_API_KEY<br/>INDEX_NAME<br/>LANGCHAIN_API_KEY<br/>LANGCHAIN_PROJECT<br/>LANGCHAIN_ENDPOINT<br/>HUGGINGFACE_TOKEN<br/>CACHE_BUCKET_NAME<br/>FIREBASE_API_KEY<br/>FIREBASE_AUTH_DOMAIN"]:::config
+            end
+            CloudRunService --> EnvConfig
+        end
+
+        %% ===== ARTIFACT STORAGE =====
+        subgraph Registry["📦 Container Registry"]
+            ArtifactRegistry["<b>Artifact Registry</b><br/>━━━━━━━━━━━━━━<br/>Format: Docker<br/>Repository: cliniclarity-app"]:::storage
+        end
+
+        %% ===== DATA & SECURITY =====
+        subgraph StorageLayer["💾 Storage & Encryption"]
+            direction LR
+            KMS["<b>Cloud KMS</b><br/>━━━━━━━━━━━━━━<br/>Key Ring: cliniclarity-cache<br/>Key: document-encryption<br/>Rotation: 9 days"]:::security
+            CacheBucket["<b>Cloud Storage</b><br/>━━━━━━━━━━━━━━<br/>Bucket: doc-cache<br/>Lifecycle: 1 day retention<br/>CMEK Encryption Enabled"]:::storage
+        end
     end
-end
 
-%% EXTERNAL SERVICES
-GEMINI{Gemini 3 Flash}
-PUB([PubMed MCP Server])
+    %% ===== CONNECTIONS & RELATIONSHIPS =====
 
-%% USER FLOW
-U -->|Step 1: Upload| ALB
-U -->|Step 2: Query| ALB
+    %% User Traffic Flow
+    Users -->|"HTTPS Request<br/>(Public Access)"| CloudRunService
+    
+    %% IAM Bindings
+    CloudRunService -->|"Runs with Identity"| ServiceAccount
+    ServiceAccount -->|"Firebase Admin<br/>(roles/firebaseauth.admin)"| FirebaseProj
+    
+    %% Storage & Encryption Flow
+    CloudRunService -->|"Document Caching<br/>(Read / Write)"| CacheBucket
+    CacheBucket -->|"Encrypted At Rest<br/>(CMEK)"| KMS
+    StorageSA -->|"Key Access<br/>(cryptoKeyEncrypterDecrypter)"| KMS
+    
+    %% Container Image Flow
+    CloudRunService -->|"Pulls Container Image"| ArtifactRegistry
+    
+    %% External API Calls (from Container)
+    EnvConfig -->|"Vector Operations"| Pinecone
+    EnvConfig -->|"Tracing & Monitoring"| LangChain
+    EnvConfig -->|"Model Inference"| HuggingFace
+    EnvConfig -->|"GenAI APIs"| GoogleAI
+    EnvConfig -->|"Auth Config"| WebClient
 
-%% TRAFFIC ROUTING
-ALB -->|Inbound Traffic| EC2_A
-ALB --> EC2_B
-ALB --> EC2_C
+    %% API Enablement (Logical Dependency)
+    GCP -.->|"Services Enabled"| EnabledAPIs
 
-%% VECTOR DATABASE
-EC2_A <--> VDB
-EC2_B <--> VDB
-EC2_C <--> VDB
-
-%% NAT EGRESS
-EC2_A -->|Egress via NAT| NAT
-EC2_B --> NAT
-EC2_C --> NAT
-
-%% EXTERNAL API CALLS
-NAT -->|Secure API Calls| GEMINI
-NAT -->|Secure API Calls| PUB
-
-%% STYLING
-classDef userNode fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000;
-classDef resource fill:#ffffff,stroke:#007bff,stroke-width:2px,color:#000000;
-classDef instance fill:#ffffff,stroke:#007bff,stroke-width:1.5px,color:#000000;
-classDef database fill:#ffffff,stroke:#28a745,stroke-width:2px,color:#000000;
-
-style VPC fill:none,stroke:#333333,stroke-width:3px
-style PublicSubnet fill:none,stroke:#ffc107,stroke-width:2.5px,stroke-dasharray:5 5
-style PrivateSubnet fill:none,stroke:#007bff,stroke-width:2.5px,stroke-dasharray:5 5
-style ASG fill:none,stroke:#333333,stroke-width:1px,stroke-dasharray:3 3
+    %% ===== LEGEND =====
+    subgraph Legend[" "]
+        direction LR
+        L1["🔵 GCP Compute"]:::gcp
+        L2["🟡 GCP Storage"]:::storage
+        L3["🟣 Security / IAM"]:::security
+        L4["🟢 External Services"]:::external
+        L5["🔴 Public Internet"]:::public
+        L6["⚪ Configuration"]:::config
+    end
 ```
 
 
