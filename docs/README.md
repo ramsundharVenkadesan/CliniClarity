@@ -136,7 +136,7 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 ---
 
 ## Cloud Architecture
-The application is deployed directly to high-performance EC2 instances within a hardened AWS environment, utilizing an Auto Scaling Group (ASG) for high availability and tiered subnets for data isolation.
+The application is deployed as a fully managed, serverless architecture on Google Cloud Platform (GCP). It utilizes Cloud Run for scalable compute, Firebase for secure identity management, and KMS-encrypted Cloud Storage to safely handle semantic caching.
 
 ```mermaid
 graph TD
@@ -258,16 +258,14 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 
 * **Immutable Redaction (PDF):** For document visualization, the system utilizes the ReportLab library to draw physical, non-recoverable black boxes over identified PHI coordinates, ensuring sensitive data cannot be recovered via text highlighting or metadata scraping.
   
-* **Network Hardening:** All reasoning nodes are located in Private Subnets. Egress traffic to the Gemini API and PubMed is routed through a central NAT Gateway, providing a single, auditable point for outgoing data.
-
+* **Customer-Managed Encryption Keys (CMEK):** All temporary data and semantic caching stored in Google Cloud Storage is encrypted at rest using Google Cloud KMS, with rigorous 9-day key rotation schedules and strict 1-day lifecycle deletion rules.
+  
 * **Adversarial Defense:** Every user query is scanned by ProtectAI to detect prompt injections, ensuring the agent cannot be manipulated into revealing system prompts or bypassing clinical guardrails.
-
-* **Least Privilege:** EC2 nodes are assigned granular IAM roles, granting access only to the specific Pinecone indices and Gemini API keys required for their specific task.
+  
+* **Least Privilege Identity:** Cloud Run services execute under a dedicated Google IAM Service Account (cliniclarity-app-service), granting access only to the specific resources and Firebase administration privileges required for runtime operations.
   
 ## 👥 The Team
 This product was developed by a cross-functional team with expertise across the full software lifecycle:
-* **Bruno:** Containerization and Infrastructure
-* **Niall:** User research and HIPAA Compliance
 * **Greti:** Compliance Documentation
 * **Ramsundhar:** Cloud Architecture and Agentic AI
 
@@ -282,12 +280,11 @@ To manage the complex clinical reasoning required for healthcare, CliniClarity u
 ---
 
 ### Infrastructure as Code (IaC): Terraform
-To ensure the product can be deployed reliably across different environments (Dev, QA, Production), the entire AWS architecture is managed via **Terraform.**
-* **Hardened Network Architecture:** Terraform defines a multi-tier VPC with strictly isolated private subnets. This ensures that the reasoning agent and sensitive ingestion nodes have zero public ingress, effectively creating a "walled garden" for patient data.
-* **Reproducibility:** The platform utilizes Custom AMIs (Amazon Machine Images) pre-configured with the CliniClarity environment. Terraform manages the Launch Templates and Auto Scaling Group (ASG) to ensure consistent deployment of these instances across Availability Zones without the overhead of a container shim."
-* **Least Privilege IAM:** Access to the Gemini API and vector store is managed through scoped IAM roles, ensuring that each node in the graph only has the specific permissions required for its task.
-* **Configuration Management:** Application updates are delivered via rolling deployments, where the ASG rotates instances to ensure zero downtime.
-* **Native Scaling:** Managed via **Auto Scaling Groups (ASG)** and **Launch Templates**. New instances are initialized with a custom AMI pre-loaded with the Python environment and application dependencies.
+To ensure the product can be deployed reliably across different environments (Dev, QA, Production), the entire Google Cloud architecture is defined and deployed via **Terraform**.
+* **Serverless Compute Provisioning:** Terraform handles the automated deployment of Google Cloud Run v2 services, pointing directly to versioned container images stored in Google Artifact Registry.
+* **Integrated Identity & Auth:** Firebase Projects, Web Apps, and Identity Platform configurations (supporting Email/Password and Google Sign-In) are fully automated and bound to the application's environment variables natively within the Terraform state.
+* **Secure Storage Infrastructure:** GCS buckets utilized for semantic caching are provisioned with 1-day TTL lifecycle rules and strictly enforced Uniform Bucket-Level Access.
+* **Automated Encryption Bindings:** Terraform dynamically provisions Cloud KMS KeyRings and CryptoKeys, automatically attaching the required cryptoKeyEncrypterDecrypter IAM roles to the underlying storage service agents to ensure seamless CMEK encryption without manual intervention.
 
 ---
   
@@ -302,5 +299,7 @@ To ensure the product can be deployed reliably across different environments (De
 
 * **DeepEval:** A specialized testing framework used to objectively audit the agent's output. It acts as the final "clinical auditor," measuring the factual alignment between the generated summary and the source medical records.
 
-* **EC2 (Amazon Elastic Compute Cloud):** High-performance instances serving as the native host for the LangGraph agent. By deploying directly to the OS, we reduce network latency and simplify the security audit path for HIPAA compliance.
+* **Google Cloud Run:** A fully managed serverless compute platform that auto-scales the containerized LangGraph application natively, abstracting away server administration while ensuring rapid scale-up for concurrent users.
+  
+* **Firebase Identity Platform:** Secures user access with enterprise-grade authentication via Google Sign-In and standard credentials, deeply integrated with the application's service accounts.
 
