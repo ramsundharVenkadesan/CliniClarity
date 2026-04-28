@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy | CliniClarity</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+<!-- HEADER -->
+<header class="bg-white border-b">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between">
+    <h1 class="font-bold text-lg">CliniClarity</h1>
+    <span class="text-sm text-gray-500">Privacy & Security</span>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="max-w-6xl mx-auto px-6 py-10">
+  <h2 class="text-3xl font-bold">Privacy Policy</h2>
+  <p class="mt-4 text-gray-600 max-w-3xl">
+    This privacy policy explains how CliniClarity processes, protects, and minimizes the use of medical data. We designed this system using privacy-first and security-focused principles aligned with healthcare data protection standards such as HIPAA.
+  </p>
+</section>
+
+<!-- LAYER 1: PRIVACY LABEL -->
+<section class="max-w-6xl mx-auto px-6 pb-10">
+  <h3 class="text-2xl font-bold mb-6">🔍 Privacy Summary (Quick View)</h3>
+
+  <div class="bg-white border rounded-xl shadow divide-y">
+
+    <div class="p-5">
+      <h4 class="font-semibold">📄 What data is collected</h4>
+      <p class="text-sm mt-2 text-gray-600">
+        Users may upload medical reports for analysis. Authentication data such as user ID or email may be collected through Firebase, but it is kept separate from medical content.
+      </p>
+    </div>
+
+    <div class="p-5">
+      <h4 class="font-semibold">🧼 How data is protected</h4>
+      <p class="text-sm mt-2 text-gray-600">
+        Sensitive data is automatically removed using redaction before any AI processing. This ensures personal identifiers are not exposed to external systems.
+      </p>
+    </div>
+
+    <div class="p-5">
+      <h4 class="font-semibold">⚡ How data is used</h4>
+      <p class="text-sm mt-2 text-gray-600">
+        Only the minimum necessary portions of the document are used for processing through retrieval techniques. This reduces unnecessary data exposure.
+      </p>
+    </div>
+
+    <div class="p-5">
+      <h4 class="font-semibold">☁️ Third-party services</h4>
+      <p class="text-sm mt-2 text-gray-600">
+        External AI and database services are used, but only receive redacted and minimized data rather than full documents.
+      </p>
+    </div>
+
+    <div class="p-5">
+      <h4 class="font-semibold">🗑️ Data storage</h4>
+      <p class="text-sm mt-2 text-gray-600">
+        Medical reports are not permanently stored. Data is processed temporarily and cleared after the session.
+      </p>
+    </div>
+
+    <div class="p-5">
+      <h4 class="font-semibold">🛡️ Security checks</h4>
+      <p class="text-sm mt-2 text-gray-600">
+        Multiple validation layers ensure only valid documents are processed and AI outputs remain accurate and safe.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- LAYER 2: FULL POLICY -->
+<section class="max-w-6xl mx-auto px-6 pb-16 space-y-10">
+
+  <h3 class="text-2xl font-bold">Detailed Privacy Policy</h3>
+
+  <div>
+    <h4 class="font-semibold text-lg">1. Data Collection</h4>
+    <p class="text-sm mt-2 text-gray-700 leading-7">
+      CliniClarity collects only the information necessary to provide its functionality. Users may voluntarily upload medical reports for analysis. When authentication is enabled, basic account information such as a user ID or email address is managed through Firebase Authentication. This authentication data is stored separately from medical report content and is not directly linked to the processed documents. This separation reduces the risk of associating personal identity with sensitive medical information and supports privacy-by-design principles.
+    </p>
+  </div>
+
+  <div>
+    <h4 class="font-semibold text-lg">2. Input Validation and Safe Processing</h4>
+    <p class="text-sm mt-2 text-gray-700 leading-7">
+      Before any processing begins, uploaded files are validated to ensure they meet expected requirements. This includes verifying that the file is a valid PDF and confirming that the content represents a medical report. Validation uses both rule-based checks and AI-assisted classification to prevent misuse, such as uploading malicious or unrelated files. By rejecting invalid inputs early, the system reduces its attack surface (the number of ways a system can be exploited) and improves overall security.
+    </p>
+  </div>
+
+  <div>
+    <h4 class="font-semibold text-lg">3. Data Redaction (Removal of Sensitive Information)</h4>
+    <p class="text-sm mt-2 text-gray-700 leading-7">
+      All uploaded reports undergo an automatic redaction process before any external processing occurs. Redaction means identifying and removing sensitive information such as names, identifiers, or other personal details. This is performed using Microsoft Presidio, a tool specifically designed to detect and anonymize personally identifiable information (PII) and protected health information (PHI). By removing sensitive data early in the pipeline, the system ensures that external services only receive anonymized content, reducing the risk of data exposure and supporting the HIPAA principle of confidentiality.
+    </p>
+  </div>
+
+  <div>
+    <h4 class="font-semibold text-lg">4. Data Minimization and Retrieval-Based Processing</h4>
+    <p class="text-sm mt-2 text-gray-700 leading-7">
+      CliniClarity uses a retrieval-based approach (often referred to as RAG, or Retrieval-Augmented Generation). Instead of processing an entire document at once, the system breaks the report into smaller segments and retrieves only the most relevant portions needed for a task. This means that the AI model works with limited, focused information rather than full reports. This approach reduces unnecessary data exposure and aligns with the HIPAA “minimum necessary” principle, which requires that only the least amount of data needed for a task should be used.
+    </p>
+  </div>
+
+  <div>
+    <h4 class="font-semibold text-lg">5. Temporary Caching</h4>
+    <p class="text-sm mt-2 text-gray-700 leading-7">
+      The system uses temporary caching during active sessions to improve performance and reduce repeated processing. Caching means storing results for a short period so the system does not need to repeat the same computation. This reduces the number of times sensitive data must be transmitted to external services. Cached data is short-lived, scoped to the user’s session, and not permanently stored. This design reduces exposure while maintaining efficiency.
+    </p>
+  </div>
+
+  <div>
+    <h4 class="font-semibold text-lg">6. Third-Party Services</h4>
+    <p class="text-sm mt-2 text-gray-700 leading-7">
+      CliniClarity uses third-party services to support functionality, including AI models for summarization and vector databases for retrieval. These services are accessed over secure HTTPS connections. Importantly, only redacted and minimized data is sent to these services rather than full, raw reports. While these providers maintain their own security measures, CliniClarity minimizes risk by limiting the type and amount of data shared.
+    </p>
+  </div>
+
+  <div>
+    <h4 class="font-semibold text-lg">7. Security Measures</h4>
+    <p class="text-sm mt-2 text-gray-700 leading-7">
+      CliniClarity implements multiple layers of security to protect user data. These include input validation, automatic redaction of sensitive data, restricted AI behavior, hallucination detection (ensuring outputs are based on real data), and protection against prompt injection (attempts to manipulate AI behavior through malicious input). Together, these safeguards reduce the likelihood of incorrect outputs, unauthorized data exposure, and system misuse. This layered approach supports both data integrity (ensuring correctness) and confidentiality.
+    </p>
+  </div>
+
+  <div>
+    <h4 class="font-semibold text-lg">8. Data Retention</h4>
+    <p class="text-sm mt-2 text-gray-700 leading-7">
+      CliniClarity does not store uploaded medical reports in a persistent database. Data is processed temporarily during a user session and is cleared afterward. Any temporary storage used for processing, such as caching or retrieval indexing, is short-lived and reset between sessions. This approach limits long-term exposure and reduces the impact of potential data compromise.
+    </p>
+  </div>
+
+  <div>
+    <h4 class="font-semibold text-lg">9. Authentication and Identity Protection</h4>
+    <p class="text-sm mt-2 text-gray-700 leading-7">
+      CliniClarity uses Firebase Authentication to manage user identity, sign in and sign up process securely. Authentication data is intentionally kept separate from uploaded medical reports. This means that even if authentication credentials were compromised, they would not directly expose sensitive medical content. This separation reduces linkage risk and enhances overall privacy protection.
+    </p>
+  </div>
+
+  <div>
+    <h4 class="font-semibold text-lg">10. HIPAA Alignment and Compliance</h4>
+    <p class="text-sm mt-2 text-gray-700 leading-7">
+      CliniClarity is designed to align with key HIPAA principles, including confidentiality, integrity, and the minimum necessary use of data. Confidentiality is supported through redaction and data minimization, ensuring sensitive information is protected. Integrity is supported through validation and output checking, ensuring that generated results are accurate and grounded in real data. The minimum necessary principle is achieved by limiting the amount of data processed at each step.
+    </p>
+    <p class="text-sm mt-2 text-gray-700 leading-7">
+      However, CliniClarity is not fully HIPAA compliant. Full compliance requires additional administrative, legal, and organizational measures beyond technical implementation. These include Business Associate Agreements (BAAs) with service providers and incident response procedures, and documented security policies. While this system demonstrates strong technical safeguards, these additional requirements are necessary for full regulatory compliance.
+    </p>
+  </div>
+
+</section>
+
+<footer class="text-center text-sm text-gray-500 pb-6">
+  © 2026 CliniClarity
+</footer>
+
+</body>
+</html>
