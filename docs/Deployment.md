@@ -40,7 +40,7 @@ gcloud config set project YOUR_GCP_PROJECT_ID
 
 ---
 
-##🔐 Step 2: Configure Environment Variables
+## 🔐 Step 2: Configure Environment Variables
 The Terraform configuration requires several sensitive API keys. **Do not hardcode these.** Instead, create a `terraform.tfvars` file in the root of your project.
 
 1. Create the file: `touch terraform.tfvars`
@@ -53,4 +53,7 @@ langchain_api_key            = "ls__YourLangchainKey"
 google_oauth_client_id       = "your-oauth-client-id.apps.googleusercontent.com"
 google_oauth_client_secret   = "your-oauth-client-secret"
 ```
+_(Note: Ensure terraform.tfvars is added to your `.gitignore` file so you don't accidentally commit it to GitHub!)_
+
+## 
 
