@@ -55,5 +55,29 @@ google_oauth_client_secret   = "your-oauth-client-secret"
 ```
 _(Note: Ensure terraform.tfvars is added to your `.gitignore` file so you don't accidentally commit it to GitHub!)_
 
-## 
+## 🏗 Step 3: Deploy with Terraform
+With your variables set and Docker running, you are ready to deploy. Terraform will use the committed `requirements.txt` file to build the Docker container deterministically, push it to GCP Artifact Registry, and deploy the Cloud Run service.
+```bash
+terraform init # 1. Initialize Terraform (downloads required providers)
+
+terraform plan # 2. Review the deployment plan
+
+terraform apply # 3. Apply the infrastructure (type 'yes' when prompted)
+```
+Deployment typically takes 5 to 8 minutes. Once complete, Terraform will output your live Cloud Run URL.
+
+## 🔥 Step 4: Post-Deployment Firebase Setup
+Because CliniClarity uses Firebase Authentication as a strict security gate, you must whitelist your new Cloud Run URL; otherwise, logins will be blocked with an auth/unauthorized-domain error.
+
+1. Open the Firebase Console.
+2. Navigate to Authentication > Settings > Authorized domains.
+3. Click Add domain.
+4. Paste your exact Cloud Run URL (e.g., cliniclarity-api-xyz-uc.a.run.app) without the https:// or trailing slashes.
+5. Click Add.
+
+_You must also ensure that Email/Password and Google Sign-In are enabled in the "Sign-in method" tab of Firebase Authentication._
+
+## 🧹 Destroying the Infrastructure
+If you need to tear down the environment to stop incurring costs, simply run: `terraform destroy`
+_(Type 'yes' when prompted. Note: You may need to manually empty the GCP Storage Buckets before Terraform can successfully delete them)._
 
