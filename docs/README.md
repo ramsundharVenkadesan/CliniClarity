@@ -289,6 +289,13 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 * **Adversarial Defense:** Every user query is scanned by ProtectAI to detect prompt injections, ensuring the agent cannot be manipulated into revealing system prompts or bypassing clinical guardrails.
   
 * **Least Privilege Identity:** Cloud Run services execute under a dedicated Google IAM Service Account (cliniclarity-app-service), granting access only to the specific resources and Firebase administration privileges required for runtime operations.
+
+## 🚀 Getting Started & Deployment
+
+To deploy your own instance of CliniClarity to Google Cloud Platform using our automated Terraform infrastructure, please refer to our dedicated deployment manual:
+
+👉 **[View the Step-by-Step Deployment Guide](docs/Deployment.md)**
+*(Note: Ensure you have Docker, Terraform, and the Google Cloud CLI installed before beginning).*
   
 ## 👥 The Team
 This product was developed by a cross-functional team with expertise across the full software lifecycle:
