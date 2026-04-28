@@ -159,7 +159,7 @@ graph TD
         
         %% ===== API LAYER =====
         subgraph EnabledAPIs["📋 Enabled Google Cloud APIs"]
-            APIList["Compute Engine API<br/>Cloud Storage API<br/>Cloud KMS API<br/>Cloud Run API<br/>Firebase API<br/>Identity Platform API"]:::apis
+            APIList["Compute Engine API<br/>Cloud Storage API<br/>Cloud KMS API<br/>Cloud Run API<br/>Firebase API<br/>Identity Platform API<br/>Secret Manager API"]:::apis
         end
 
         %% ===== IDENTITY & AUTH =====
@@ -183,7 +183,7 @@ graph TD
             CloudRunService["<b>Cloud Run Service</b><br/>━━━━━━━━━━━━━━<br/>Container: cliniclarity-app:latest<br/>Port: 8080<br/>Ingress: All traffic allowed"]:::gcp
             
             subgraph EnvConfig["📦 Container Environment"]
-                EnvVars["<b>Runtime Configuration</b><br/>━━━━━━━━━━━━━━<br/>GOOGLE_API_KEY<br/>INDEX_NAME<br/>LANGCHAIN_API_KEY<br/>LANGCHAIN_PROJECT<br/>LANGCHAIN_ENDPOINT<br/>HUGGINGFACE_TOKEN<br/>CACHE_BUCKET_NAME<br/>FIREBASE_API_KEY<br/>FIREBASE_AUTH_DOMAIN"]:::config
+                EnvVars["<b>Runtime Configuration</b><br/>━━━━━━━━━━━━━━<br/>GOOGLE_API_KEY (Secret)<br/>INDEX_NAME<br/>LANGCHAIN_API_KEY (Secret)<br/>LANGCHAIN_PROJECT<br/>LANGCHAIN_ENDPOINT<br/>HUGGINGFACE_TOKEN (Secret)<br/>PINECONE_API_KEY (Secret)<br/>CACHE_BUCKET_NAME<br/>FIREBASE_API_KEY<br/>FIREBASE_AUTH_DOMAIN"]:::config
             end
             CloudRunService --> EnvConfig
         end
@@ -194,10 +194,11 @@ graph TD
         end
 
         %% ===== DATA & SECURITY =====
-        subgraph StorageLayer["💾 Storage & Encryption"]
+        subgraph StorageLayer["💾 Storage, Secrets & Encryption"]
             direction LR
             KMS["<b>Cloud KMS</b><br/>━━━━━━━━━━━━━━<br/>Key Ring: cliniclarity-cache<br/>Key: document-encryption<br/>Rotation: 9 days"]:::security
             CacheBucket["<b>Cloud Storage</b><br/>━━━━━━━━━━━━━━<br/>Bucket: doc-cache<br/>Lifecycle: 1 day retention<br/>CMEK Encryption Enabled"]:::storage
+            SecretManager["<b>Secret Manager</b><br/>━━━━━━━━━━━━━━<br/>Securely Stores API Keys<br/>(Google, Pinecone, HF, LangChain)"]:::security
         end
     end
 
@@ -209,12 +210,16 @@ graph TD
     %% IAM Bindings
     CloudRunService -->|"Runs with Identity"| ServiceAccount
     ServiceAccount -->|"Firebase Admin<br/>(roles/firebaseauth.admin)"| FirebaseProj
+    ServiceAccount -->|"Secret Accessor<br/>(roles/secretmanager.secretAccessor)"| SecretManager
     
     %% Storage & Encryption Flow
     CloudRunService -->|"Document Caching<br/>(Read / Write)"| CacheBucket
     CacheBucket -->|"Encrypted At Rest<br/>(CMEK)"| KMS
     StorageSA -->|"Key Access<br/>(cryptoKeyEncrypterDecrypter)"| KMS
     
+    %% Secret Injection
+    SecretManager -.->|"Injects Secure Variables<br/>(Value from Secret)"| EnvConfig
+
     %% Container Image Flow
     CloudRunService -->|"Pulls Container Image"| ArtifactRegistry
     
