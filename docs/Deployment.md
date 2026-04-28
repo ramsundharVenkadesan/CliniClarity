@@ -36,6 +36,7 @@ gcloud auth application-default login
 
 # 3. Set your active GCP project
 gcloud config set project YOUR_GCP_PROJECT_ID
+```
 
 ---
 
