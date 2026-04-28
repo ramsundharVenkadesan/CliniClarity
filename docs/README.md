@@ -294,7 +294,7 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 
 To deploy your own instance of CliniClarity to Google Cloud Platform using our automated Terraform infrastructure, please refer to our dedicated deployment manual:
 
-👉 **[View the Step-by-Step Deployment Guide](docs/Deployment.md)**
+👉 **[View the Step-by-Step Deployment Guide](Deployment.md)**
 *(Note: Ensure you have Docker, Terraform, and the Google Cloud CLI installed before beginning).*
   
 ## 👥 The Team
