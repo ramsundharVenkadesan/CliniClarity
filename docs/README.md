@@ -20,52 +20,79 @@ CliniClarity provides an evidence-based pipeline where every response is mathema
 
 #### Visualizing the Pipeline
 ```mermaid
-    graph TD
-    %% Define styles for Dark/Light mode compatibility
+flowchart TB
+    %% High-Contrast Class Definitions
     classDef user fill:#8b5cf6,stroke:#4c1d95,stroke-width:2px,color:#fff,font-weight:bold
-    classDef gcp fill:#0ea5e9,stroke:#0369a1,stroke-width:2px,color:#fff,font-weight:bold
-    classDef data fill:#10b981,stroke:#047857,stroke-width:2px,color:#fff,font-weight:bold
-    classDef external fill:#f59e0b,stroke:#b45309,stroke-width:2px,color:#fff,font-weight:bold
-    classDef security fill:#ef4444,stroke:#b91c1c,stroke-width:2px,color:#fff,font-weight:bold
+    classDef sec fill:#ef4444,stroke:#b91c1c,stroke-width:2px,color:#fff,font-weight:bold
+    classDef process fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff,font-weight:bold
+    classDef eval fill:#f59e0b,stroke:#b45309,stroke-width:2px,color:#fff,font-weight:bold
+    classDef agent fill:#a855f7,stroke:#7e22ce,stroke-width:2px,color:#fff,font-weight:bold
+    classDef tools fill:#f43f5e,stroke:#be123c,stroke-width:2px,color:#fff,font-weight:bold
+    classDef ext fill:#10b981,stroke:#047857,stroke-width:2px,color:#fff,font-weight:bold
+    classDef router fill:#475569,stroke:#1e293b,stroke-width:2px,color:#fff,stroke-dasharray: 5 5
 
-    Client((User)):::user
+    Client((User / Web App)):::user
 
-    subgraph Google Cloud Platform [Google Cloud Platform Infrastructure]
-        style Google Cloud Platform fill:transparent,stroke:#9ca3af,stroke-width:2px,stroke-dasharray: 5 5
-
-        Firebase[Firebase Identity Platform<br/>Email & Google Auth]:::security
-        CloudRun[Cloud Run v2 Service<br/>FastAPI Backend API]:::gcp
-        SecretManager[Secret Manager<br/>API Keys & Tokens]:::security
-        GCS[(Cloud Storage<br/>Summary Cache)]:::data
-        KMS[Cloud KMS<br/>Cryptographic Keys]:::security
-        ArtifactRegistry[Artifact Registry<br/>Docker Image Repo]:::data
+    %% ---------------- SECURITY GATEWAY ----------------
+    subgraph SecurityGateway ["🛡️ API Gateway & Security"]
+        direction TB
+        Auth[Firebase JWT Verification]:::sec
+        HF[HuggingFace DeBERTa<br/>Prompt Injection Firewall]:::sec
+        Auth --> HF
     end
 
-    subgraph External Services [External AI & Data Services]
-        style External Services fill:transparent,stroke:#9ca3af,stroke-width:2px,stroke-dasharray: 5 5
+    %% Client ingress
+    Client -- "1. POST /summary (PDF File)" --> Auth
+    Client -- "2. POST /question (Chat Text)" --> Auth
 
-        Pinecone[(Pinecone DB<br/>Serverless Index 1536)]:::external
-        Gemini[Google Gemini API<br/>LLM Processing]:::external
-        HuggingFace[HuggingFace<br/>Prompt Injection Scanner]:::external
-        LangSmith[LangSmith<br/>Tracing & Observability]:::external
+    %% ---------------- SHARED STORAGE & TOOLS ----------------
+    subgraph StorageTools ["💾 Shared Storage & External Tools"]
+        direction LR
+        Pinecone[(Pinecone Vector DB<br/>Dim: 1536)]:::ext
+        GCS[(GCS Bucket<br/>Report Caching)]:::ext
+        MCP[FastMCP Server<br/>PubMed API]:::ext
     end
 
-    %% Client Interactions
-    Client -- "1. Logs in via Web App" --> Firebase
-    Client -- "2. Submits PDF & Queries (with JWT)" --> CloudRun
-    CloudRun -- "3. Validates Token" --> Firebase
+    %% ---------------- WORKFLOW A: RAG ARCHITECT ----------------
+    subgraph GraphWorkflow ["⚙️ Workflow A: RAG Architect (LangGraph)"]
+        direction TB
+        Load[Load PDF & Extract]:::process --> Redact[Redact PII]:::process
+        Redact --> Ingest[Vectorize Data]:::process
+        Ingest --> Summarize[Generate Draft]:::process
+        Summarize --> Hallucination[DeepEval Accuracy Check]:::eval
+        
+        Hallucination --> RouteScore{Score > 0.9?}:::router
+        RouteScore -- "Failure" --> Summarize
+        
+        RouteScore -- "Success" --> AuditLoop[Reflection/Audit Node<br/>Checks Jargon & Format]:::process
+    end
 
-    %% GCP Internal Dependencies
-    ArtifactRegistry -. "Deploys Container Image" .-> CloudRun
-    SecretManager -. "Injects Secrets at Runtime" .-> CloudRun
-    KMS -. "CMEK Encryption" .-> GCS
+    %% ---------------- WORKFLOW B: QA AGENT ----------------
+    subgraph AgentWorkflow ["🤖 Workflow B: Medical Assistant (ReAct)"]
+        direction TB
+        ReActAgent[LangChain Agent Executor<br/>Dynamic LLM Selection]:::agent
+        ToolRouter{Agent Tool Router}:::tools
+        
+        ReActAgent <--> |"Decides which tool to use"| ToolRouter
+    end
 
-    %% Cloud Run Workflow Logic
-    CloudRun -- "1-Day TTL Caching" --> GCS
-    CloudRun -- "Ingress Security Audit" --> HuggingFace
-    CloudRun -- "Vectorize & Search" --> Pinecone
-    CloudRun -- "RAG & Summarization" --> Gemini
-    CloudRun -- "Log Agent Telemetry" --> LangSmith
+    %% ---------------- ROUTING FROM FIREWALL ----------------
+    HF -- "If Valid PDF Upload" --> Load
+    HF -- "If Safe Chat Query" --> ReActAgent
+    HF -- "Malicious Input" --> Blocked[Terminate Stream]:::sec
+
+    %% ---------------- INTERNAL CONNECTIONS ----------------
+    %% Graph populates Pinecone
+    Ingest -- "Upserts Vectors" --> Pinecone
+    
+    %% Agent reads Pinecone and uses MCP
+    ToolRouter -- "clini_clarity_documents" --> Pinecone
+    ToolRouter -- "search_medical_literature" --> MCP
+
+    %% ---------------- EGRESS & CACHING ----------------
+    AuditLoop -- "Write Hash" --> GCS
+    AuditLoop -- "SSE Stream: Generated Report" --> Client
+    ReActAgent -- "SSE Stream: 6th-Grade Answer" --> Client
 ```
 ---
 
