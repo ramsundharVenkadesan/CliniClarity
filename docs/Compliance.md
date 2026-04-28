@@ -3,11 +3,25 @@
 
 ---
 
+## HIPAA Alignment & Privacy-by-Design
+CliniClarity is engineered to strictly align with the HIPAA Privacy Rule's "Safe Harbor" de-identification standards. 
+* **Alignment vs. Certification:** The system architecture and data pipelines are built to process healthcare data securely. However, because the application currently operates without formal Business Associate Agreements (BAAs) with all downstream infrastructure providers, it is classified as *HIPAA-aligned* rather than fully HIPAA compliant.
+* **Transparency & Health Literacy:** The application enforces transparent user privacy notices and granular output verification to meet strict clinical safety and health literacy standards, ensuring patients understand the boundaries and safeguards of the AI assistant.
+
+---
+
 ## Zero-Trust Ingress (Layer 0 & 1)
 CliniClarity operates under the assumption that all user input is potentially hostile or irrelevant. We employ a multi-tiered ingress defense mechanism before any data enters the cognitive pipeline.
 * **The Medical Gatekeeper (Tier 0):** A two-stage validation process blocks non-clinical data. A fast heuristic scan checks for medical markers, followed by a lightweight LLM validation. If a user uploads a non-medical document (e.g., a recipe or malicious script), the stream is gracefully terminated, preventing vector database pollution and API waste.
 * **Local Adversarial Defense (Tier 1):** Before the LangChain orchestrator receives the document, the text is scanned by a localized Hugging Face Small Language Model (ProtectAI DeBERTa). This model acts as a physical firewall, detecting and blocking prompt injections, DAN attacks, and jailbreak attempts with microsecond latency.
 * **Prompt Sandboxing:** All extracted clinical text is strictly isolated within XML delimiters (`<clinical_data>`). The agent is explicitly instructed to treat any commands found within these delimiters as untrusted plain text, neutralizing embedded system overrides.
+
+---
+
+## Data Isolation & Storage Security
+To prevent cross-contamination of patient data and unauthorized access, strict boundaries are enforced at the storage layer.
+* **Irreversible Local Redaction:** Microsoft Presidio is implemented to perform irreversible local redaction of Protected Health Information (PHI) and Personally Identifiable Information (PII). This sanitization occurs within the secure application boundary *before* any text is embedded or transmitted to the LLM. 
+* **Vector Tenant Isolation:** All embeddings stored in the Pinecone vector database are strictly isolated using metadata filtering. Every vector is cryptographically bound to a specific `user_id` authenticated via Firebase, ensuring the retrieval engine can mathematically only access records belonging to the active session.
 
 ---
 
@@ -24,6 +38,8 @@ The core reasoning engine (LangGraph) has been heavily modified to prioritize de
 Securing the output is just as critical as securing the input. CliniClarity employs a "Circuit Breaker" architecture to intercept compromised responses.
 * **Intrinsic Safety Alignment:** By neutralizing external payload injections at the ingress point (via DeBERTa) and explicitly removing code-execution tools from the reasoning environment, CliniClarity safely leverages the core LLM to generate clinical summaries without requiring a heavy, resource-intensive egress-evaluation model.
 * **Double-Pass PII Redaction:** Microsoft Presidio is implemented on both the ingress and egress nodes. It redacts Protected Health Information (PHI) before it is sent to the LLM, and scans the final output to ensure no hallucinations have leaked synthetic or real identifiers.
+
+---
 
 ## Operational Resilience
 Transparency ensures that every claim made by the AI can be verified by a human healthcare professional.
