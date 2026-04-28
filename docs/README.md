@@ -21,57 +21,51 @@ CliniClarity provides an evidence-based pipeline where every response is mathema
 #### Visualizing the Pipeline
 ```mermaid
     graph TD
-    %% Global Styles
-    classDef userNode fill:#ffffff,stroke:#000,stroke-width:2px,color:#000,font-weight:bold;
-    classDef security fill:#fff1f1,stroke:#e57373,stroke-width:2px,color:#b71c1c;
-    classDef core fill:#f0f7ff,stroke:#64b5f6,stroke-width:2px,color:#0d47a1;
-    classDef tool fill:#f6fff8,stroke:#81c784,stroke-width:2px,color:#1b5e20;
-    classDef final fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff,font-weight:bold;
-    classDef block fill:#c62828,stroke:#b71c1c,stroke-width:2px,color:#fff;
-    classDef ingestion fill:#fff9db,stroke:#f59f00,stroke-width:2px,color:#862e00;
+    %% Define styles for Dark/Light mode compatibility
+    classDef user fill:#8b5cf6,stroke:#4c1d95,stroke-width:2px,color:#fff,font-weight:bold
+    classDef gcp fill:#0ea5e9,stroke:#0369a1,stroke-width:2px,color:#fff,font-weight:bold
+    classDef data fill:#10b981,stroke:#047857,stroke-width:2px,color:#fff,font-weight:bold
+    classDef external fill:#f59e0b,stroke:#b45309,stroke-width:2px,color:#fff,font-weight:bold
+    classDef security fill:#ef4444,stroke:#b91c1c,stroke-width:2px,color:#fff,font-weight:bold
 
-    %% 1. Secure Ingestion Pipeline
-    User((User)):::userNode -->|Upload PDF| PDF[PDF Parser/PyMuPDF]:::ingestion
-    
-    subgraph SI [🔐 SECURE INGESTION LAYER]
-        PDF --> Presidio[Microsoft Presidio: Local PII Redaction]:::security
-        Presidio -->|Anonymized Text| Embed[Gemini-Embedding-001]:::ingestion
-        Embed --> VectorDB[(Pinecone: Anonymized Vector Store)]:::tool
+    Client((User)):::user
+
+    subgraph Google Cloud Platform [Google Cloud Platform Infrastructure]
+        style Google Cloud Platform fill:transparent,stroke:#9ca3af,stroke-width:2px,stroke-dasharray: 5 5
+
+        Firebase[Firebase Identity Platform<br/>Email & Google Auth]:::security
+        CloudRun[Cloud Run v2 Service<br/>FastAPI Backend API]:::gcp
+        SecretManager[Secret Manager<br/>API Keys & Tokens]:::security
+        GCS[(Cloud Storage<br/>Summary Cache)]:::data
+        KMS[Cloud KMS<br/>Cryptographic Keys]:::security
+        ArtifactRegistry[Artifact Registry<br/>Docker Image Repo]:::data
     end
 
-    %% 2. Adversarial Query Defense
-    User -->|Question| API[FastAPI Gateway]
-    
-    subgraph SG [🛡️ ADVERSARIAL DEFENSE LAYER]
-        API --> PI[ProtectAI: Injection Scan]:::security
-        PI -->|Fail| Block1[❌ BLOCKED]:::block
-        PI -->|Pass| MI[Semantic: Intent Route]:::security
-        MI -->|Fail| Block2[❌ OFF-TOPIC]:::block
+    subgraph External Services [External AI & Data Services]
+        style External Services fill:transparent,stroke:#9ca3af,stroke-width:2px,stroke-dasharray: 5 5
+
+        Pinecone[(Pinecone DB<br/>Serverless Index 1536)]:::external
+        Gemini[Google Gemini API<br/>LLM Processing]:::external
+        HuggingFace[HuggingFace<br/>Prompt Injection Scanner]:::external
+        LangSmith[LangSmith<br/>Tracing & Observability]:::external
     end
 
-    %% 3. Agentic Reasoning
-    subgraph AC [🧠 AGENTIC REASONING]
-        MI -->|Pass| Agent[LangGraph Controller]:::core
-        Agent <--> LLM[Gemini 3 Flash]:::core
-        
-        subgraph TL [🛠️ MCP & DATA TOOLS]
-            Agent <--> VectorDB
-            Agent <--> PubMed[MCP: PubMed Server]:::tool
-        end
-    end
+    %% Client Interactions
+    Client -- "1. Logs in via Web App" --> Firebase
+    Client -- "2. Submits PDF & Queries (with JWT)" --> CloudRun
+    CloudRun -- "3. Validates Token" --> Firebase
 
-    %% 4. Quality Assurance
-    subgraph VQ [✅ QUALITY ASSURANCE]
-        Agent --> Eval[DeepEval: Hallucination Check]:::core
-        Eval -->|Pass| Out[Final 6th-Grade Answer]:::final
-        Eval -->|Fail| Agent
-    end
+    %% GCP Internal Dependencies
+    ArtifactRegistry -. "Deploys Container Image" .-> CloudRun
+    SecretManager -. "Injects Secrets at Runtime" .-> CloudRun
+    KMS -. "CMEK Encryption" .-> GCS
 
-    %% Apply Container Styles
-    style SI fill:none,stroke:#f59f00,stroke-dasharray: 5 5
-    style SG fill:none,stroke:#e57373,stroke-dasharray: 5 5
-    style AC fill:none,stroke:#64b5f6,stroke-dasharray: 5 5
-    style VQ fill:none,stroke:#9575cd,stroke-dasharray: 5 5
+    %% Cloud Run Workflow Logic
+    CloudRun -- "1-Day TTL Caching" --> GCS
+    CloudRun -- "Ingress Security Audit" --> HuggingFace
+    CloudRun -- "Vectorize & Search" --> Pinecone
+    CloudRun -- "RAG & Summarization" --> Gemini
+    CloudRun -- "Log Agent Telemetry" --> LangSmith
 ```
 ---
 
