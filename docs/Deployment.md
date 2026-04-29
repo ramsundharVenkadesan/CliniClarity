@@ -27,7 +27,7 @@ Terraform automates the "wires," but Google requires manual verification for ide
 
 1. **Create a GCP Project:** Manually create a new project in the Google Cloud Console.  
 2. **Link Billing:** Ensure an active billing account is attached to the project.  
-3. **OAuth Consent Screen:** * Navigate to **APIs & Services** > **OAuth consent screen**.
+3. **OAuth Consent Screen:** Navigate to **APIs & Services** > **OAuth consent screen**.
     * Configure the screen (Internal/External), add your support email, and include the `auth/userinfo.email` and `auth/userinfo.profile` scopes.  
 4. **Generate OAuth Credentials:**
     * Navigate to **APIs & Services** > **Credentials**.
