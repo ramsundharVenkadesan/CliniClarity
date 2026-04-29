@@ -26,4 +26,4 @@ This document outlines the technical evolution and upcoming deployment path for 
 | **Foundations Complete** | Feb 28, 2026 | Functional LangChain ReAct agent with FastAPI and Pinecone. |
 | **Agentic Refactor** | Mar 15, 2026 | Migration to LangGraph, Tool-Calling, and MCP Server architecture. |
 | **Security Freeze** | Apr 15, 2026 | Hallucination checking (DeepEval) and injection defense (Protect AI) active. |
-| **Cloud Release (V1.0)** | May 12, 2026 | Fully automated AWS deployment via Terraform with integrated audit logs. |
+| **Cloud Release (V1.0)** | Apr 28, 2026 | Fully automated GCP deployment via Terraform with integrated audit logs. |
