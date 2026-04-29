@@ -16,6 +16,8 @@ CliniClarity provides an evidence-based pipeline where every response is mathema
 * **Clinically Grounded:** Uses a dedicated FastMCP server to query high-authority databases like PubMed.
 * **Verified Output:** Utilizes DeepEval to audit for hallucinations, ensuring the final answer strictly adheres to the provided medical context.
 
+---
+
 ## 🛠️ Agent Architecture
 
 #### Visualizing the Pipeline
@@ -272,6 +274,7 @@ graph TD
     end
 ```
 
+---
 
 ## 🔒 Security & HIPAA-First Standards
 To ensure Protected Health Information (PHI) is never exposed to public models or unauthorized cloud logs, CliniClarity implements a "Local-First" automated redaction pipeline. This architecture satisfies HIPAA "Safe Harbor" standards by de-identifying data before it enters the RAG ecosystem.
@@ -290,6 +293,8 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
   
 * **Least Privilege Identity:** Cloud Run services execute under a dedicated Google IAM Service Account (cliniclarity-app-service), granting access only to the specific resources and Firebase administration privileges required for runtime operations.
 
+---
+
 ## 📚 Official Documentation
 
 For a deeper dive into the engineering decisions, compliance standards, and future plans for CliniClarity, please refer to our official documentation library:
@@ -307,17 +312,23 @@ For a deeper dive into the engineering decisions, compliance standards, and futu
   * **[Orchestration Framework Selection](architecture/decisions/Orchestration-Framework.md)**
   * **[Adversarial Prompt Defense with Protect AI](architecture/decisions/Protect-AI.md)**
 
+---
+
 ## 🚀 Getting Started & Deployment
 
 To deploy your own instance of CliniClarity to Google Cloud Platform using our automated Terraform infrastructure, please refer to our dedicated deployment manual:
 
 👉 **[View the Step-by-Step Deployment Guide](docs/Deployment.md)**
 *(Note: Ensure you have Docker, Terraform, and the Google Cloud CLI installed before beginning).*
+
+---
   
 ## 👥 The Team
 This product was developed by a cross-functional team with expertise across the full software lifecycle:
 * **Greti:** Compliance Documentation
 * **Ramsundhar:** Cloud Architecture and Agentic AI
+
+---
 
 ## Technical Appendix
 
