@@ -22,6 +22,20 @@ You will also need active accounts and API keys for the following services:
 
 ---
 
+## 🛠️ Phase 0: Human-in-the-Loop (HITL) Manual Setup
+Terraform automates the "wires," but Google requires manual verification for identity and legal steps. You must complete these steps before running the automation:  
+
+1. Create a GCP Project: Manually create a new project in the Google Cloud Console.  
+2. Link Billing: Ensure an active billing account is attached to the project.  
+3. OAuth Consent Screen: * Navigate to APIs & Services > OAuth consent screen.
+    * Configure the screen (Internal/External), add your support email, and include the auth/userinfo.email and auth/userinfo.profile scopes.  
+4. Generate OAuth Credentials:
+    * Navigate to APIs & Services > Credentials.
+    * Create an OAuth 2.0 Client ID (Web Application).
+    * Note your Client ID and Client Secret for Step 2.
+
+----
+
 ## 🚀 Step 1: Local Authentication
 
 First, authenticate your local machine with Google Cloud and Docker so Terraform has the permissions it needs to build and deploy. Open your terminal and run:
