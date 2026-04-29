@@ -32,7 +32,7 @@ To ensure the product lifecycle is grounded in real-world needs, the following p
 ## Autonomous Agent Lifecycle 
 This section details the two-phase logic that manages the transition from static summary to interactive research.
 
-* **Phase I: Automated Insight Generation (RAG Architect)** * **Trigger:** Successful ingestion and sanitization of the medical PDF via the `/summary` endpoint.
+* **Phase I: Automated Insight Generation (RAG Architect)** **Trigger:** Successful ingestion and sanitization of the medical PDF via the `/summary` endpoint.
   * **Process:** Data is scrubbed by Presidio, chunked, and upserted into Pinecone. LangGraph orchestrates the reasoning loop, drafting a summary and passing it through a DeepEval hallucination check. A Reflection node audits the tone and jargon.
   * **Output:** A cached, clinical-grade "Highlights Summary" streamed back to the UI.
 
