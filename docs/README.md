@@ -58,7 +58,10 @@ flowchart TB
     %% ---------------- WORKFLOW A: RAG ARCHITECT ----------------
     subgraph GraphWorkflow ["⚙️ Workflow A: RAG Architect (LangGraph)"]
         direction TB
-        Load[Load PDF & Extract]:::process --> Redact[Redact PII]:::process
+        Load[Load PDF & Extract Hash]:::process --> RouteCache{Is Document<br/>Cached?}:::router
+        
+        %% Cache Miss Pipeline
+        RouteCache -- "No (Cache Miss)" --> Redact[Redact PII]:::process
         Redact --> Ingest[Vectorize Data]:::process
         Ingest --> Summarize[Generate Draft]:::process
         Summarize --> Hallucination[DeepEval Accuracy Check]:::eval
@@ -67,6 +70,9 @@ flowchart TB
         RouteScore -- "Failure" --> Summarize
         
         RouteScore -- "Success" --> AuditLoop[Reflection/Audit Node<br/>Checks Jargon & Format]:::process
+
+        %% Cache Hit Pipeline
+        RouteCache -- "Yes (Cache Hit)" --> FormatCached[Retrieve Cached Summary]:::process
     end
 
     %% ---------------- WORKFLOW B: QA AGENT ----------------
@@ -93,7 +99,10 @@ flowchart TB
 
     %% ---------------- EGRESS & CACHING ----------------
     AuditLoop -- "Write Hash" --> GCS
+    FormatCached -. "Read Hash" .-> GCS
+    
     AuditLoop -- "SSE Stream: Generated Report" --> Client
+    FormatCached -- "SSE Stream: Cached Report" --> Client
     ReActAgent -- "SSE Stream: 6th-Grade Answer" --> Client
 ```
 ---
