@@ -290,11 +290,28 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
   
 * **Least Privilege Identity:** Cloud Run services execute under a dedicated Google IAM Service Account (cliniclarity-app-service), granting access only to the specific resources and Firebase administration privileges required for runtime operations.
 
+## 📚 Official Documentation
+
+For a deeper dive into the engineering decisions, compliance standards, and future plans for CliniClarity, please refer to our official documentation library:
+
+* **[Product Requirements Document (PRD)](PRD.md):** The complete architectural blueprint, user personas, and success metrics.
+* **[Security & Compliance Architecture](Compliance.md):** Details on our zero-trust ingress, irreversible local redaction, and HIPAA-aligned vector isolation.
+* **[V1.0 Execution Roadmap](Roadmap.md):** Our project timeline, milestones, and transition to a cloud-native agentic architecture.
+  
+* **Architecture Decision Records (ADRs):**
+  * **[Hallucination Auditing with DeepEval](architecture/decisions/DeepEval-Auditing.md)**
+  * **[Standardizing on Google Cloud Platform](architecture/decisions/GCP.md)**
+  * **[Gemini Model Selection](architecture/decisions/Gemini-Model-Choice.md)**
+  * **[Infrastructure as Code (IaC) via Terraform](architecture/decisions/IAC-Decision.md)**
+  * **[Local PII/PHI Redaction with Presidio](architecture/decisions/Presidio-Redaction.md)**
+  * **[Orchestration Framework Selection](architecture/decisions/Orchestration-Framework.md)**
+  * **[Adversarial Prompt Defense with Protect AI](architecture/decisions/Protect-AI.md)**
+
 ## 🚀 Getting Started & Deployment
 
 To deploy your own instance of CliniClarity to Google Cloud Platform using our automated Terraform infrastructure, please refer to our dedicated deployment manual:
 
-👉 **[View the Step-by-Step Deployment Guide](Deployment.md)**
+👉 **[View the Step-by-Step Deployment Guide](docs/Deployment.md)**
 *(Note: Ensure you have Docker, Terraform, and the Google Cloud CLI installed before beginning).*
   
 ## 👥 The Team
