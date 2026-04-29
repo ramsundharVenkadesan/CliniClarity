@@ -11,7 +11,6 @@ Before deploying, ensure you have the following installed and configured on your
 1. **[Terraform CLI](https://developer.hashicorp.com/terraform/downloads)** (v1.0+)
 2. **[Google Cloud CLI (`gcloud`)](https://cloud.google.com/sdk/docs/install)**
 3. **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** (Must be running during deployment for Terraform to build and push the container)
-4. **Git**
 
 You will also need active accounts and API keys for the following services:
 * **Google Cloud Platform:** A project with billing enabled.
