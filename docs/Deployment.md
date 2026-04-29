@@ -75,7 +75,10 @@ Terraform uses a "backend" to track the state of your infrastructure. Because GC
 2. Open the `Terraform.tf` file in your code editor.
 3. Locate the backend "gcs" block at the top of the file.
 4. Replace the hardcoded `bucket` name with your newly created, globally unique bucket name.
+
 _(Note: If you are just deploying a test instance for yourself, you can simply delete the entire backend "gcs" { ... } block to store the state locally on your machine instead)._
+
+---
 
 ## 🏗 Step 4: Deploy with Terraform
 With your variables set and Docker running, you are ready to deploy. Terraform will use the committed `requirements.txt` file to build the Docker container deterministically, push it to GCP Artifact Registry, and deploy the Cloud Run service.
