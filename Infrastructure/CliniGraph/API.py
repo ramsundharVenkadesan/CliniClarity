@@ -11,9 +11,8 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
 load_dotenv()
 clini_clarity = FastAPI()
-
-firebase_admin.initialize_app(options={'projectId': 'cliniclarity'})
-
+firebase_project_id = os.getenv("FIREBASE_PROJECT_ID")
+firebase_admin.initialize_app(options={'projectId': firebase_project_id})
 
 templates = Jinja2Templates(directory="templates")
 
@@ -24,7 +23,7 @@ def get_firebase_config():
     return {
         "firebase_api_key": os.getenv("FIREBASE_API_KEY"),
         "firebase_auth_domain": os.getenv("FIREBASE_AUTH_DOMAIN"),
-        "firebase_project_id": "cliniclarity" # Hardcoded project ID is safe, or pull from env
+        "firebase_project_id": os.getenv("FIREBASE_PROJECT_ID") 
     }
 
 @clini_clarity.get("/privacy", response_class=HTMLResponse)

@@ -8,7 +8,7 @@ locals {
 }
 
 resource "google_secret_manager_secret" "api_keys" {
-  for_each = local.secrets_map
+  for_each  = local.secrets_map
   secret_id = each.key
   replication {
     auto {}
@@ -16,7 +16,7 @@ resource "google_secret_manager_secret" "api_keys" {
 }
 
 resource "google_secret_manager_secret_version" "api_key_data" {
-  secret = google_secret_manager_secret.api_keys[each.key].id
-  for_each = local.secrets_map
+  secret      = google_secret_manager_secret.api_keys[each.key].id
+  for_each    = local.secrets_map
   secret_data = each.value
 }

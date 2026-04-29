@@ -1,7 +1,7 @@
 locals {
   services = ["compute.googleapis.com", "storage.googleapis.com", "cloudkms.googleapis.com",
     "run.googleapis.com", "firebase.googleapis.com", "identitytoolkit.googleapis.com",
-    "secretmanager.googleapis.com", "containerscanning.googleapis.com"]
+  "secretmanager.googleapis.com", "containerscanning.googleapis.com"]
 }
 
 resource "google_project_service" "enable_apis" {
@@ -13,12 +13,12 @@ resource "google_project_service" "enable_apis" {
 resource "google_service_account" "cliniclarity_service_account" {
   account_id   = "cliniclarity-app-service"
   display_name = "CliniClarity Application Identity"
-  depends_on = [google_project_service.enable_apis]
+  depends_on   = [google_project_service.enable_apis]
 }
 
 module "storage" {
-  source     = "./Storage"
-  depends_on = [google_project_service.enable_apis]
+  source                = "./Storage"
+  depends_on            = [google_project_service.enable_apis]
   service_account_email = google_service_account.cliniclarity_service_account.email
 }
 
@@ -59,12 +59,12 @@ module "compute" {
   langchain_api_key = var.langchain_api_key
   cache_bucket_name = module.storage.storage_bucket
 
-  google_oauth_client_id = var.google_oauth_client_id
+  google_oauth_client_id     = var.google_oauth_client_id
   google_oauth_client_secret = var.google_oauth_client_secret
-  service_account_email = google_service_account.cliniclarity_service_account.email
-  artifact_repository = module.storage.artifact_repo
-  project  = var.project
-  display_name = "CliniClarity Web App"
+  service_account_email      = google_service_account.cliniclarity_service_account.email
+  artifact_repository        = module.storage.artifact_repo
+  project                    = var.project
+  display_name               = "CliniClarity Web App"
 }
 
 import {

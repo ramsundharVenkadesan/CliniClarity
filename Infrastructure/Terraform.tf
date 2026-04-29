@@ -32,8 +32,8 @@ provider "pinecone" {
 provider "random" {}
 
 provider "google" {
-  region  = "us-central1"
-  project = "cliniclarity"
+  region                = "us-central1"
+  project               = "cliniclarity"
   billing_project       = "cliniclarity"
   user_project_override = true
 }

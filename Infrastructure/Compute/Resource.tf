@@ -26,7 +26,7 @@ resource "google_cloud_run_v2_service" "cliniclarity_api" {
     timeout = "300s"
 
     containers {
-      image = "us-central1-docker.pkg.dev/cliniclarity/${var.artifact_repository}/cliniclarity-agent:latest"
+      image = "us-central1-docker.pkg.dev/${var.project}/${var.artifact_repository}/cliniclarity-agent:latest"
 
       ports {
         container_port = 8080
@@ -40,10 +40,10 @@ resource "google_cloud_run_v2_service" "cliniclarity_api" {
       }
 
       env {
-        name  = "GOOGLE_API_KEY"
+        name = "GOOGLE_API_KEY"
         value_source {
           secret_key_ref {
-            secret = google_secret_manager_secret.api_keys["google-api-key"].secret_id
+            secret  = google_secret_manager_secret.api_keys["google-api-key"].secret_id
             version = "latest"
           }
         }
@@ -54,10 +54,14 @@ resource "google_cloud_run_v2_service" "cliniclarity_api" {
         value = var.index
       }
       env {
-        name  = "LANGCHAIN_API_KEY"
+        name  = "FIREBASE_PROJECT_ID"
+        value = var.project
+      }
+      env {
+        name = "LANGCHAIN_API_KEY"
         value_source {
           secret_key_ref {
-            secret = google_secret_manager_secret.api_keys["langchain-api-key"].secret_id
+            secret  = google_secret_manager_secret.api_keys["langchain-api-key"].secret_id
             version = "latest"
           }
         }
@@ -68,19 +72,19 @@ resource "google_cloud_run_v2_service" "cliniclarity_api" {
       }
 
       env {
-        name  = "HF_TOKEN"
+        name = "HF_TOKEN"
         value_source {
           secret_key_ref {
-            secret = google_secret_manager_secret.api_keys["huggingface-token"].secret_id
+            secret  = google_secret_manager_secret.api_keys["huggingface-token"].secret_id
             version = "latest"
           }
         }
       }
       env {
-        name  = "PINECONE_API_KEY"
+        name = "PINECONE_API_KEY"
         value_source {
           secret_key_ref {
-            secret = google_secret_manager_secret.api_keys["pinecone-api-key"].secret_id
+            secret  = google_secret_manager_secret.api_keys["pinecone-api-key"].secret_id
             version = "latest"
           }
         }
