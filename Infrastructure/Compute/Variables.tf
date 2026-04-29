@@ -12,18 +12,16 @@ variable "artifact_repository" {
   type = string
 }
 
+variable "project" {
+  type = string
+}
+
+variable "display_name" {
+  type = string
+}
+
 variable "service_account_email" {
   type = string
-}
-
-variable "cliniclarity_vpc" {
-  type = string
-  default = "cliniclarity-vpc"
-}
-
-variable "cliniclarity_subnet" {
-  type = string
-  default = "cliniclarity-subnet"
 }
 
 variable "google_api_key" {

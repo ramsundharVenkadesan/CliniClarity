@@ -1,11 +1,11 @@
 resource "google_firebase_project" "cliniclarity_firebase" {
   provider = google-beta
-  project  = "cliniclarity"
+  project  = var.project
 }
 
 resource "google_identity_platform_config" "auth_config" {
   provider = google-beta
-  project  = "cliniclarity"
+  project  = var.project
 
   sign_in {
     allow_duplicate_emails = false
@@ -20,7 +20,7 @@ resource "google_identity_platform_config" "auth_config" {
 
 resource "google_identity_platform_default_supported_idp_config" "google_sign_in" {
   provider      = google-beta
-  project       = "cliniclarity"
+  project       = var.project
   enabled       = true
   idp_id        = "google.com"
   client_id     = var.google_oauth_client_id
@@ -31,13 +31,13 @@ resource "google_identity_platform_default_supported_idp_config" "google_sign_in
 
 resource "google_firebase_web_app" "cliniclarity_web_app" {
   provider     = google-beta
-  project      = "cliniclarity"
-  display_name = "CliniClarity Web App"
+  project      = var.project
+  display_name = var.display_name
   depends_on   = [google_firebase_project.cliniclarity_firebase]
 }
 
 data "google_firebase_web_app_config" "app_config" {
   provider   = google-beta
-  project    = "cliniclarity"
+  project    = var.project
   web_app_id = google_firebase_web_app.cliniclarity_web_app.app_id
 }

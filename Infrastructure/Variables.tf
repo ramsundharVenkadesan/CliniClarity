@@ -27,6 +27,10 @@ variable "cloud" {
   }
 }
 
+variable "project" {
+  type = string
+}
+
 variable "pinecone_region" {
   type    = string
   default = "us-east-1"

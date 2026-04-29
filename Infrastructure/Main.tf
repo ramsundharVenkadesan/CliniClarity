@@ -63,6 +63,8 @@ module "compute" {
   google_oauth_client_secret = var.google_oauth_client_secret
   service_account_email = google_service_account.cliniclarity_service_account.email
   artifact_repository = module.storage.artifact_repo
+  project  = var.project
+  display_name = "CliniClarity Web App"
 }
 
 import {

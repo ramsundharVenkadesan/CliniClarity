@@ -27,6 +27,14 @@ def get_firebase_config():
         "firebase_project_id": "cliniclarity" # Hardcoded project ID is safe, or pull from env
     }
 
+@clini_clarity.get("/privacy", response_class=HTMLResponse)
+async def privacy_page(request: Request):
+    return templates.TemplateResponse(request=request, name="privacy.html")
+
+@clini_clarity.get("/terms", response_class=HTMLResponse)
+async def terms_page(request: Request):
+    return templates.TemplateResponse(request=request, name="terms.html")
+
 @clini_clarity.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     context = {"request": request}

@@ -1,11 +1,11 @@
 resource "google_project_iam_member" "firebase_admin" {
-  project = "cliniclarity"
+  project = var.project
   role    = "roles/firebaseauth.admin"
   member  = "serviceAccount:${var.service_account_email}"
 }
 
 resource "google_project_iam_member" "secret_accessor" {
-  project = "cliniclarity"
+  project = var.project
   role    = "roles/secretmanager.secretAccessor"
   member  = "serviceAccount:${var.service_account_email}"
 }
