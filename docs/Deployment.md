@@ -41,14 +41,11 @@ Terraform automates the "wires," but Google requires manual verification for ide
 First, authenticate your local machine with Google Cloud and Docker so Terraform has the permissions it needs to build and deploy. Open your terminal and run:
 
 ```bash
-# 1. Login to Google Cloud
-gcloud auth login
+gcloud auth login # 1. Login to Google Cloud
 
-# 2. Set your default application credentials for Terraform
-gcloud auth application-default login
+gcloud auth application-default login # 2. Set your default application credentials for Terraform
 
-# 3. Set your active GCP project
-gcloud config set project YOUR_GCP_PROJECT_ID
+gcloud config set project YOUR_GCP_PROJECT_ID # 3. Set your active GCP project
 ```
 
 ---
