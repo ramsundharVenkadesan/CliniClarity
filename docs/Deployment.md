@@ -63,6 +63,7 @@ google_api_key               = "AIzaSyYourGoogleApiKeyHere..."
 pinecone_api_key             = "your-pinecone-api-key"
 hugging_face_token           = "hf_YourHuggingFaceToken"
 langchain_api_key            = "ls__YourLangchainKey"
+pinecone                     = "index"
 google_oauth_client_id       = "your-oauth-client-id.apps.googleusercontent.com"
 google_oauth_client_secret   = "your-oauth-client-secret"
 ```
