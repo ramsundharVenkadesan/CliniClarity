@@ -345,7 +345,7 @@ To ensure the product can be deployed reliably across different environments (De
 * **Serverless Compute Provisioning:** Terraform handles the automated deployment of Google Cloud Run v2 services, pointing directly to versioned container images stored in Google Artifact Registry.
 * **Integrated Identity & Auth:** Firebase Projects, Web Apps, and Identity Platform configurations (supporting Email/Password and Google Sign-In) are fully automated and bound to the application's environment variables natively within the Terraform state.
 * **Secure Storage Infrastructure:** GCS buckets utilized for semantic caching are provisioned with 1-day TTL lifecycle rules and strictly enforced Uniform Bucket-Level Access.
-* **Automated Encryption Bindings:** Terraform dynamically provisions Cloud KMS KeyRings and CryptoKeys, automatically attaching the required cryptoKeyEncrypterDecrypter IAM roles to the underlying storage service agents to ensure seamless CMEK encryption without manual intervention.
+* **Automated Encryption Bindings:** Terraform dynamically provisions Cloud KMS KeyRings and CryptoKeys, automatically attaching the required `cryptoKeyEncrypterDecrypter` IAM roles to the underlying storage service agents to ensure seamless CMEK encryption without manual intervention.
 
 ---
   
