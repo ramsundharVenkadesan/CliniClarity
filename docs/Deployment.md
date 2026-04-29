@@ -69,7 +69,15 @@ _(Note: Ensure terraform.tfvars is added to your `.gitignore` file so you don't 
 
 ---
 
-## 🏗 Step 3: Deploy with Terraform
+## 🪣 Step 3: Configure Terraform State Bucket
+Terraform uses a "backend" to track the state of your infrastructure. Because GCS backend blocks do not accept variables, you must manually update this before initializing.
+1. Create a standard Google Cloud Storage bucket in your GCP console to hold your state file.
+2. Open the `Terraform.tf` file in your code editor.
+3. Locate the backend "gcs" block at the top of the file.
+4. Replace the hardcoded `bucket` name with your newly created, globally unique bucket name.
+_(Note: If you are just deploying a test instance for yourself, you can simply delete the entire backend "gcs" { ... } block to store the state locally on your machine instead)._
+
+## 🏗 Step 4: Deploy with Terraform
 With your variables set and Docker running, you are ready to deploy. Terraform will use the committed `requirements.txt` file to build the Docker container deterministically, push it to GCP Artifact Registry, and deploy the Cloud Run service.
 ```bash
 terraform init # 1. Initialize Terraform (downloads required providers)
@@ -82,7 +90,7 @@ Deployment typically takes 5 to 8 minutes. Once complete, Terraform will output 
 
 ---
 
-## 🔥 Step 4: Post-Deployment Firebase Setup
+## 🔥 Step 5: Post-Deployment Firebase Setup
 Because CliniClarity uses Firebase Authentication as a strict security gate, you must whitelist your new Cloud Run URL; otherwise, logins will be blocked with an auth/unauthorized-domain error.
 
 1. Open the **[Firebase Console](https://console.firebase.google.com/u/0/)**.
