@@ -76,7 +76,7 @@ Terraform uses a "backend" to track the state of your infrastructure. Because GC
 3. Locate the backend "gcs" block at the top of the file.
 4. Replace the hardcoded `bucket` name with your newly created, globally unique bucket name.
 
-_(Note: If you are just deploying a test instance for yourself, you can simply delete the entire backend "gcs" { ... } block to store the state locally on your machine instead)._
+_(Note: If you are just deploying a test instance for yourself, you can simply delete the entire backend `"gcs" { ... } block` to store the state locally on your machine instead)._
 
 ---
 
