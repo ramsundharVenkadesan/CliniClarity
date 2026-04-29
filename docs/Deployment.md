@@ -72,7 +72,7 @@ Deployment typically takes 5 to 8 minutes. Once complete, Terraform will output 
 ## 🔥 Step 4: Post-Deployment Firebase Setup
 Because CliniClarity uses Firebase Authentication as a strict security gate, you must whitelist your new Cloud Run URL; otherwise, logins will be blocked with an auth/unauthorized-domain error.
 
-1. Open the Firebase Console.
+1. Open the **[Firebase Console](https://console.firebase.google.com/u/0/)**.
 2. Navigate to Authentication > Settings > Authorized domains.
 3. Click Add domain.
 4. Paste your exact Cloud Run URL (e.g., cliniclarity-api-xyz-uc.a.run.app) without the https:// or trailing slashes.
