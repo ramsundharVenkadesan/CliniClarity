@@ -128,7 +128,7 @@ Below is the architectural blueprint of CliniClarity, illustrating the flow from
    * **Intent Routing:** Semantic Vector Router (Cosine Similarity topic enforcement)
 3. **Data & Infrastructure**
    * **Vector Database:** Pinecone (Serverless)
-   * **Infrastructure as Code:** Terraform (AWS VPC & EC2 orchestration)
+   * **Infrastructure as Code:** Terraform (GCP infrastructure)
    * **API Layer:** FastAPI with Asynchronous Server-Sent Events (SSE)
 
 ---
