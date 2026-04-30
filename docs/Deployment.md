@@ -80,8 +80,15 @@ _(Note: If you are just deploying a test instance for yourself, you can simply d
 
 ---
 
-## 🏗 Step 4: Deploy with Terraform
-With your variables set and Docker running, you are ready to deploy. Terraform will use the committed `requirements.txt` file to build the Docker container deterministically, push it to GCP Artifact Registry, and deploy the Cloud Run service.
+## 🏗 Step 4: Pre-Deployment Check & Deploy
+
+### ⚠️ Important: Handling Identity Platform Imports
+
+At the bottom of Main.tf, there is an import block for google_identity_platform_config.  
+   * **If you are using a Brand New Account/Project:** You MUST comment out or delete this import block. Terraform cannot import a resource that does not exist yet; it will create it fresh during the deployment.  
+   * **If you are redeploying to an Existing Project:** Keep the import block active to ensure Terraform syncs with your existing Firebase identity settings.
+
+Once the check is complete and Docker is running, you are ready to deploy. With your variables set and Docker running, you are ready to deploy. Terraform will use the committed `requirements.txt` file to build the Docker container deterministically, push it to GCP Artifact Registry, and deploy the Cloud Run service.
 ```bash
 terraform init # 1. Initialize Terraform (downloads required providers)
 
