@@ -32,15 +32,15 @@ provider "pinecone" {
 provider "random" {}
 
 provider "google" {
-  region                = "us-central1"
-  project               = "cliniclarity"
-  billing_project       = "cliniclarity"
+  region                = var.region
+  project               = var.project
+  billing_project       = var.billing_project
   user_project_override = true
 }
 
 provider "google-beta" {
-  region                = "us-central1"
-  project               = "cliniclarity"
-  billing_project       = "cliniclarity"
+  region                = var.region
+  project               = var.project
+  billing_project       = var.billing_project
   user_project_override = true
 }

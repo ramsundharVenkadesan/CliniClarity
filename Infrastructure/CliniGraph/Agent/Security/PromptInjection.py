@@ -2,14 +2,11 @@ from transformers import pipeline
 import logging
 
 try:
-
     injection_classifier = pipeline(
         "text-classification",
         model="protectai/deberta-v3-base-prompt-injection-v2",
         device=-1 # # -1 forces CPU which is highly stable for testing (device=0 if you have a GPU)
     ) # Load the Prompt Injection Detector ONCE at startup
-
-
 except Exception as e:
     logging.info(f"🚨 Security Model Failed to Load: {e}")
 

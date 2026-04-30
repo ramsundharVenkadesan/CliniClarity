@@ -12,12 +12,12 @@ from mcp.client.stdio import stdio_client # Import function to connect to the MC
 import os # Import package to access OS level tools
 from Agent.Security.PromptInjection import is_prompt_injection # Import function to check for prompt injection
 from Agent.Logging.CallBack import CallBackHandler # Import class to track model changes
-import sys
-from pathlib import Path
+import sys # Import Sys library
+from pathlib import Path # Import Path library
 
 
-current_dir = Path(__file__).resolve().parent
-pubmed_path = current_dir.parent / "MCP" / "PubMed.py"
+current_dir = Path(__file__).resolve().parent # Retrieve parent directory
+pubmed_path = current_dir.parent / "MCP" / "PubMed.py" # Access the source file with MCP server
 load_dotenv() # Invoke function to load API keys
 
 callback_handler = CallBackHandler() # Handler to track LLM changes
@@ -37,26 +37,29 @@ mcp_server_parameters = StdioServerParameters(command=sys.executable, # Runtime 
 
 
 async def ask_question(query:str, model: str, provider: str, user_id:str): # Asynchronous function
-    is_safe = await is_prompt_injection(query)
-    if is_safe:
-        yield "Security Alert: This query violates system safety protocols and has been blocked."
-        return
+    is_injection = await is_prompt_injection(query) # Check for prompt injection
+
+    if is_injection: # Prompt passed to model is not safe
+        yield "Security Alert: This query violates system safety protocols and has been blocked." # Message to presented to user
+        return # The application is halted
+
     retriever = vector_database.as_retriever(search_kwargs={'k': 5, 'namespace': user_id})  # Retriever object configured to retrieve 5 most relevant documents based on an input query
     retriever_tool = create_retriever_tool(retriever=retriever,  # Wrap the retriever object into an executable tool
                                            name='clini_clarity_documents',  # Equip the tool with a name
                                            description="Search for information within the patient's specific medical report. Use this first!")  # Agent is able to invoke the object as a tool
 
-    async with stdio_client(mcp_server_parameters) as (read, write):
-        async with ClientSession(read_stream=read, write_stream=write) as session:
-            await session.initialize()
-            tools = await load_mcp_tools(session)
-            tools.append(retriever_tool)
+    async with stdio_client(mcp_server_parameters) as (read, write): # Open a connection to the MCP server
+        async with ClientSession(read_stream=read, write_stream=write) as session: # Create a session object to persist connection
+            await session.initialize() # Allow server and host to perform handshake and initialize the connection
+            tools = await load_mcp_tools(session) # Use the initialized session to retrieve all MCP tools and perform conversion
+            tools.append(retriever_tool) # Append the retriever object to the tools list
 
             prompt = ChatPromptTemplate.from_messages([
                 ("system", query_prompt.format(system_prompt=custom_instructions)),
                 ("human", "{input}"),
                 ('placeholder', "{agent_scratchpad}")
             ])
+
             dynamic_model = init_chat_model(model=model, model_provider=provider, temperature=0.0, streaming=True)
             agent = create_tool_calling_agent(llm=dynamic_model, tools=tools, prompt=prompt)
             agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True,

@@ -27,6 +27,10 @@ variable "cloud" {
   }
 }
 
+variable "billing_project" {
+  type = string
+}
+
 variable "project" {
   type = string
 }

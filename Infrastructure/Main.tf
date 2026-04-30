@@ -68,6 +68,6 @@ module "compute" {
 }
 
 import {
-  id = "projects/cliniclarity"
+  id = "projects/${var.project}"
   to = module.compute.google_identity_platform_config.auth_config
 }

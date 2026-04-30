@@ -16,6 +16,10 @@ resource "google_identity_platform_config" "auth_config" {
   }
 
   depends_on = [google_firebase_project.cliniclarity_firebase]
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "google_identity_platform_default_supported_idp_config" "google_sign_in" {
