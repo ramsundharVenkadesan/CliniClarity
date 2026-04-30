@@ -64,6 +64,7 @@ pinecone                     = "index"
 google_oauth_client_id       = "your-oauth-client-id.apps.googleusercontent.com"
 google_oauth_client_secret   = "your-oauth-client-secret"
 project                      = "GCP-Project"
+billing_project              = "GCP-Billing-Project"
 ```
 _(Note: Ensure terraform.tfvars is added to your `.gitignore` file so you don't accidentally commit it to GitHub!)_
 
