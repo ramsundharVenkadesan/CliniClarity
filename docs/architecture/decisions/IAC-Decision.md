@@ -4,10 +4,10 @@
 * **Date:** 2026-03-16
 
 ## Context
-To satisfy HIPAA requirements, the cloud environment hosting CliniClarity (VPCs, IAM roles, and S3 buckets) must be reproducible, version-controlled, and strictly isolated. Manual configuration ("ClickOps") introduces human error and lacks the audit trail necessary for healthcare certification.
+To satisfy HIPAA requirements, the cloud environment hosting CliniClarity must be reproducible, version-controlled, and strictly isolated. Manual configuration ("ClickOps") introduces human error and lacks the audit trail necessary for healthcare certification.
 
 ## Decision: Utilize Terraform for Multi-Cloud Provisioning
-We have selected Terraform to define and deploy the entire CliniClarity stack across AWS (for core compute) and GCP (for specific AI services), ensuring that the infrastructure is treated exactly like application code.
+We have selected Terraform to define and deploy the entire CliniClarity stack across GCP ensuring that the infrastructure is treated exactly like application code.
 
 ## Decision Rationale
 * Declarative Blueprints: HIPAA requires a contingency plan; Terraform allows us to rebuild the entire clinical environment in a new region in minutes if a primary site fails.
