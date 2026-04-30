@@ -25,6 +25,11 @@ resource "google_cloud_run_v2_service" "cliniclarity_api" {
 
     timeout = "300s"
 
+    scaling {
+      min_instance_count = 1
+      max_instance_count = 5
+    }
+
     containers {
       image = "us-central1-docker.pkg.dev/${var.project}/${var.artifact_repository}/cliniclarity-agent:latest"
 
@@ -33,6 +38,7 @@ resource "google_cloud_run_v2_service" "cliniclarity_api" {
       }
 
       resources {
+        startup_cpu_boost = true
         limits = {
           cpu    = "2"
           memory = "4Gi"

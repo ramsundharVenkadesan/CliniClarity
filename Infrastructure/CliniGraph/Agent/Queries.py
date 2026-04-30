@@ -41,8 +41,7 @@ async def ask_question(query:str, model: str, provider: str, user_id:str): # Asy
     if is_safe:
         yield "Security Alert: This query violates system safety protocols and has been blocked."
         return
-    retriever = vector_database.as_retriever(search_kwargs={'k': 5, 'filter': {"user_id": {
-        "$eq": user_id}}})  # Retriever object configured to retrieve 5 most relevant documents based on an input query
+    retriever = vector_database.as_retriever(search_kwargs={'k': 5, 'namespace': user_id})  # Retriever object configured to retrieve 5 most relevant documents based on an input query
     retriever_tool = create_retriever_tool(retriever=retriever,  # Wrap the retriever object into an executable tool
                                            name='clini_clarity_documents',  # Equip the tool with a name
                                            description="Search for information within the patient's specific medical report. Use this first!")  # Agent is able to invoke the object as a tool

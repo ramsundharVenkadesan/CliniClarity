@@ -11,28 +11,9 @@ class DocumentValidation(BaseModel): # Define validation schema class
     reasoning: str = Field(description="Short reason why this is or isn't a medical document.") # Field to extract a reason why the uploaded document is or is not a medical document
 
 
-def is_medical_heuristic(text: str) -> bool: # Generic Function to evaluate the uploaded document for essential markers
-    """Fast check for essential medical markers before calling the LLM.""" # Doc-String used as metadata
-
-    medical_keywords = [
-        "patient", "physician", "diagnosis", "symptoms", "treatment",
-        "clinical", "laboratory", "rx", "medication", "prognosis",
-        "medical record", "history of present illness", "icd-10"
-    ] # A list of sample medical keywords
-
-    text_lower = text.lower() # Lowercase all the characters
-    matches = sum(1 for word in medical_keywords if word in text_lower) # Increment by one for every medical term from source text
-
-    # If at least 3 unique medical keywords are present, it's worth processing
-    return matches >= 3 # At least 3 unique medical words are present in the document
-
-
 async def validate_medical_document(pdf_text: str, model=dynamic_model) -> bool: # Generic function to validate the uploaded document
     """Final gatekeeper check using the LLM for context.""" # Doc-String used as metadata
 
-    if not is_medical_heuristic(pdf_text[:2000]): # Extract first 2000 characters from the uploaded document
-        logging.info("🚨 Blocked: Document failed basic medical keyword heuristic.")
-        return False # The text failed to satisfy the check
 
     validation_prompt = f"""
     Analyze the following document snippet. Is this a medical record, clinical summary, or lab report?

@@ -107,7 +107,7 @@ async def generate_summary(
                     if doc_hash and not current_state.get('is_cached'):
                         storage_client = storage.Client()
                         bucket_name = os.environ.get("CACHE_BUCKET_NAME", "cliniclarity-doc-cache")
-                        cache_blob = storage_client.bucket(bucket_name).blob(f"{doc_hash}.txt")
+                        cache_blob = storage_client.bucket(bucket_name).blob(f"{user_id}/{doc_hash}.txt")
                         cache_blob.upload_from_string(draft_response)
                         logging.info(f"💾 Saved new summary to 15-minute cache: {doc_hash}.txt")
                     html_markdown = markdown.markdown(draft_response) # Extract the final generated summary from the state-graph
@@ -146,33 +146,29 @@ from Agent.RAG_Graph.Ingestion import vector_database
 
 
 @rag_router.post("/logout-purge")
-async def logout_purge(
-        doc_hash: str = None,  # <-- Accepts the hash as a query parameter
-        user_id: str = Depends(verify_token)
-):
+async def logout_purge(user_id: str = Depends(verify_token)):
     """
     Deletes all vectors associated with the user_id from Pinecone
     and wipes the specific document summary from Cloud Storage.
     """
     try:
-        # 1. Purge Pinecone (Metadata Filtered)
-        vector_database.delete(filter={"user_id": {"$eq": user_id}})
-        logging.info(f"🧹 Pinecone vectors purged for user: {user_id}")
+        try:
+            vector_database.delete(delete_all = True, namespace=user_id)
+            logging.info(f"🧹 Pinecone vectors purged for user: {user_id}")
+        except Exception as ex:
+            logging.info(f"ℹ️ Pinecone namespace '{user_id}' likely already empty. ({ex})")
 
-        # 2. Purge GCS Cache File
-        if doc_hash:
-            bucket_name = os.environ.get("CACHE_BUCKET_NAME", "cliniclarity-doc-cache")
 
-            blob = storage_client.bucket(bucket_name).get_blob(f"{doc_hash}.txt")
+        bucket_name = os.environ.get("CACHE_BUCKET_NAME", "cliniclarity-doc-cache")
+        bucket = storage_client.bucket(bucket_name)
+        blobs = bucket.list_blobs(prefix=f"{user_id}/")
+        deleted_count = 0
 
-            # Since get_blob returns None if the file is missing, just check if it is truthy:
-            if blob:
-                blob.delete()
-                logging.info(f"🗑️ GCS Cache Purged: {doc_hash}.txt")
-            else:
-                logging.info(f"ℹ️ No GCS file found for hash: {doc_hash}")
+        for blob in blobs:
+            blob.delete()
+            deleted_count += 1
 
-        return {"status": "success", "message": "Session data fully purged."}
+        return {"status": "success", "message": f"Zero-retention purge complete for {user_id}."}
 
     except Exception as e:
         logging.error(f"Purge Error: {e}")

@@ -30,10 +30,10 @@ async def load_pdf(state:GraphState) -> Dict[str, Any]: # Node that accepts the 
     loader = PyMuPDFLoader(state['file_path']) # Load the PDF document into the Document-Loader class
     docs = loader.load() # Load the PDF file into LangChain Documents
     raw_pdf_text = "".join([doc.page_content for doc in docs]) # Combined raw text data from each loaded document
-
+    user_id = state.get('user_id')
     doc_hash = hashlib.md5(raw_pdf_text.encode('utf-8')).hexdigest() # Create a MD5 hash of the raw text
 
-    blob = bucket.get_blob(f"{doc_hash}.txt")
+    blob = bucket.get_blob(f"{user_id}/{doc_hash}.txt")
 
     if blob: # Check if the hash is in the dictionary
         now = datetime.datetime.now(datetime.timezone.utc)
@@ -70,22 +70,17 @@ async def redact_PII(state:GraphState) -> Dict[str, Any]: # Node to redact the l
 async def ingestion(state:GraphState) -> Dict[str, Any]: # Node to inject redacted documents to Pinecone
 
     try: # Attempt to connect and ingest chunks into Pinecone
-
         cleaned_docs = state.get('documents') # Retrieve the list of redacted documents from state-dictionary
         user_id = state.get('user_id')
         splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50) # Text-Splitter to split the documents into chunks
         chunks = splitter.split_documents(cleaned_docs) # Split the redacted documents into chunks
-        for chunk in chunks:
-            if chunk.metadata is None:
-                chunk.metadata = {}
-            chunk.metadata['user_id'] = user_id
 
         try: # Attempt to clear any existing chunks from the database
-            vector_database.delete(delete_all=True) # Delete or clean any existing chunks in the vector-database
+            vector_database.delete(delete_all=True, namespace=user_id) # Delete or clean any existing chunks in the vector-database
         except Exception as delete_error: # Error in deleting existing chunks in the vector-database
-            logging.info(f"Skipped deletion (index likely empty). Details: {delete_error}") # Index is empty
+            logging.info(f"Skipped deletion (namespace likely empty). Details: {delete_error}") # Index is empty
 
-        PineconeVectorStore.from_documents(documents=chunks, embedding=embedding_model, index_name=os.environ.get("INDEX_NAME")) # Initialize a vector-database with chunks and embedding model
+        PineconeVectorStore.from_documents(documents=chunks, embedding=embedding_model, index_name=os.environ.get("INDEX_NAME"), namespace=user_id) # Initialize a vector-database with chunks and embedding model
         return {'documents': chunks, 'status': True} # Update the state dictionary with loaded chunks and status to true because ingestion was successful
 
     except Exception as e: # Exception block to catch any ingestion errors
