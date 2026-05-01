@@ -23,15 +23,19 @@ You will also need active accounts and API keys for the following services:
 ---
 
 ## 🛠️ Phase 0: Human-in-the-Loop (HITL) Manual Setup
-Terraform automates the "wires," but Google requires manual verification for identity and legal steps. You must complete these steps before running the automation:  
+Terraform automates the "wires," but Google requires manual verification for identity and legal steps, as well as a few foundational APIs that can be unreliable when enabled strictly through code on a brand-new project. You must complete these steps to generate the OAuth credentials needed for your Terraform variables before running the automation:
 
 1. **Create a GCP Project:** Manually create a new project in the Google Cloud Console.  
-2. **Link Billing:** Ensure an active billing account is attached to the project.  
-3. **OAuth Consent Screen:** Navigate to **APIs & Services** > **OAuth consent screen**.
+2. **Link Billing:** Ensure an active billing account is attached to the project.
+3. **Enable Core APIs Manually:** Terraform can sometimes time out or fail due to race conditions when trying to enable foundational APIs on a brand-new project. To prevent deployment crashes, navigate to APIs & Services > Library and manually enable:
+      * **Identity and Access Management (IAM) API** (`iam.googleapis.com`)
+      * **Cloud Resource Manager API** (`cloudresourcemanager.googleapis.com`)
+5. **OAuth Consent Screen:** Navigate to **APIs & Services** > **OAuth consent screen**.
     * Configure the screen (Internal/External), add your support email, and include the `auth/userinfo.email` and `auth/userinfo.profile` scopes.  
-4. **Generate OAuth Credentials:**
+6. **Generate OAuth Credentials:**
     * Navigate to **APIs & Services** > **Credentials**.
     * Create an **OAuth 2.0 Client ID** (Web Application).
+    * **CRITICAL:** Under **Authorized redirect URIs**, you must add your Firebase auth handlers so logins do not fail. Add these two URLs (replacing `<your-project-id>` with your actual GCP project ID): `https://<your-project-id>.firebaseapp.com/__/auth/handler`
     * Note your **Client ID** and **Client Secret** for Step 2.
 
 ----
@@ -84,12 +88,12 @@ _(Note: If you are just deploying a test instance for yourself, you can simply d
 ## 🏗 Step 4: Pre-Deployment Check & Deploy
 
 ### ⚠️ Important: Handling Identity Platform Imports
+Because Google Cloud "soft deletes" Identity Platform configurations, you must handle the import block at the bottom of your Terraform configuration carefully, depending on your project's current state:
+   * **For a Brand New/Clean Project:** The import block MUST be commented out. Terraform cannot import a resource that hasn't been enabled or created yet; it will build the auth config from scratch.
+   * **For an Existing Project (or Rebuilding after a `terraform destroy`):** The `import` block **MUST** be present and active (uncommented). Even after a destroy, GCP invisibly retains the auth config. The import block tells Terraform to adopt that existing config into the state file rather than crashing with an "already exists" error.
 
-At the bottom of `Main.tf`, there is an `import` block for `google_identity_platform_config`.  
-   * **If you are using a Brand New Account/Project:** You **MUST** comment out or delete this import block. Terraform cannot `import` a resource that does not exist yet; it will create it fresh during the deployment.  
-   * **If you are redeploying to an Existing Project:** Keep the `import` block active to ensure Terraform syncs with your existing Firebase identity settings.
+Once the check is complete and Docker is running, you are ready to deploy. Terraform will use the committed requirements.txt file to build the Docker container deterministically, push it to GCP Artifact Registry, and deploy the Cloud Run service.
 
-Once the check is complete and Docker is running, you are ready to deploy. With your variables set and Docker running, you are ready to deploy. Terraform will use the committed `requirements.txt` file to build the Docker container deterministically, push it to GCP Artifact Registry, and deploy the Cloud Run service.
 ```bash
 terraform init # 1. Initialize Terraform (downloads required providers)
 
