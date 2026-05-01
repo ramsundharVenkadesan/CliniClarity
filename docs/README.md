@@ -3,18 +3,23 @@
 **A personal health research assistant designed to be a bridge between a clinical visit and a patient's home life.**
 
 ## 📋 Product Vision and Strategy 
-CliniClarity is not a diagnostic engine; it is a specialized AI Security Architect-led research platform engineered to help patients navigate complex medical journeys with grounded, verifiable intelligence.
+For patients and families who feel lost in medical jargon or overwhelmed by scary, unverified internet searches , CliniClarity is a personal health research assistant that turns dense medical reports into clear, easy-to-understand summaries. Unlike general search engines that prioritize marketing and ads, our tool ensures every answer is directly backed by your specific health records and peer-reviewed medical journals. 
 
-### The Problem: Dense Jargon and "Dr.Google
-* **Medical Complexity:** Patients receive dense reports where critical insights are buried in peer-to-peer clinical shorthand.
-* **The Hallucination Risk:** General LLMs often "guess" or prioritize SEO-optimized blogs over clinical reality.
-* **Security Vulnerabilities:** Standard AI wrappers are susceptible to prompt injections and PII leaks, making them unsuitable for healthcare.
+### How It Works
+CliniClarity bridges the gap between complex clinical documentation and patient comprehension through a secure, multi-agent architecture:
 
-### The Solution: Deterministic & Grounded Intelligence
-CliniClarity provides an evidence-based pipeline where every response is mathematically and clinically verified.
-* **Security-First:** Implements local adversarial defense to block prompt injections before they reach the reasoning engine.
-* **Clinically Grounded:** Uses a dedicated FastMCP server to query high-authority databases like PubMed.
-* **Verified Output:** Utilizes DeepEval to audit for hallucinations, ensuring the final answer strictly adheres to the provided medical context.
+* **Patient-Centric Summarization:** Transforms dense clinical notes, lab results, and discharge summaries into plain language without losing critical medical context.
+* **Evidence-Based Grounding:** Utilizes Retrieval-Augmented Generation (RAG) to ensure explanations are tied strictly to verified medical literature and the user's uploaded documents, eliminating the noise of standard web searches.
+* **Strict Clinical Auditing:** Employs DeepEval for rigorous hallucination checks, ensuring the AI agent remains factually accurate and strictly adheres to the provided medical context.
+* **Privacy First (HIPAA Aligned):** Built with security at the forefront. Documents undergo automated PII (Personally Identifiable Information) redaction before processing, ensuring patient data remains anonymous and secure within our Google Cloud Run and Firebase ecosystem.
+
+### Under the Hood
+
+To deliver a reliable and secure experience, CliniClarity is powered by a modern, cloud-native AI stack:
+* **Core Logic:** Python, LangChain, and LangGraph for orchestrating autonomous medical agents.
+* **Infrastructure:** Serverless deployment on Google Cloud Platform via Terraform.
+* **Security & Auth:** Firebase Authentication, local HuggingFace prompt-injection firewalls, and Google Cloud Secret Manager.
+* **Quality Assurance:** DeepEval for continuous metric-driven testing of AI outputs.
 
 ---
 
