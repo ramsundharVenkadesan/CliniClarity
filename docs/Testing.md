@@ -2,8 +2,8 @@ This document outlines the validation strategies used to ensure the security, re
 
 # 1. LLM Evaluation (DeepEval)
 We utilize **DeepEval** to perform "Unit Testing" on the AI's output. The primary metric is the **Faithfulness Metric**, which measures how well the summary is grounded in the original medical context.
-    * **Threshold:** Score > 0.9 (Accepted); Score ≤ 0.9 (Rejected).
-    * **Audit Process:** If a summary falls below the threshold, the system flags a potential hallucination and rejects the state update.
+* **Threshold:** Score > 0.9 (Accepted); Score ≤ 0.9 (Rejected).
+* **Audit Process:** If a summary falls below the threshold, the system flags a potential hallucination and rejects the state update.
 
 ---
 
