@@ -12,4 +12,4 @@ class GraphState(TypedDict): # Typed-Dictionary class to maintain and hold state
     is_cached: bool # Property to maintain caching
     pdf_text:str # Property to extract PDF text data
     doc_hash:str # Property to store unique document hash
-    user_id:str
+    user_id:str # Property to store user-ID

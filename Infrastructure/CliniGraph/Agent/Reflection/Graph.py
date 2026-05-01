@@ -4,8 +4,7 @@ from langgraph.graph import END, StateGraph # Import State-Graph and Terminator 
 from Agent.Reflection.Chains import generation, reflection # Import generation and reflection runnable chains
 from Agent.Reflection.State import MessageGraph # Import state dictionary
 from typing import Dict, Any # Import Typing package
-import datetime # Import Date-Time package
-import logging
+import logging # Import the logging package
 
 load_dotenv() # Invoke function to load API keys
 
@@ -16,7 +15,7 @@ def generation_node(state:MessageGraph) -> Dict[str, Any]: # Node function to ge
     if iteration == 1: # Number of current iteration is one
         logging.info(f"\n️ [ARCHITECT - Pass {iteration}]: Drafting initial clinical summary...") # Draft the initial summary
     else: # The iteration is above one
-        logging.info(f"\n👨‍⚕️ [ARCHITECT - Pass {iteration}]: Reading Auditor's Memo and revising summary...") # Read the corrective memo and revise the summary
+        logging.info(f"\n [ARCHITECT - Pass {iteration}]: Reading Auditor's Memo and revising summary...") # Read the corrective memo and revise the summary
 
     response = generation.invoke(input={'messages': state.get('messages')}) # Invoke the generation node by retrieving messages from state dictionary
 
@@ -34,11 +33,11 @@ def reflection_node(state:MessageGraph) -> Dict[str, Any]: # Node function to re
         reflection_result = reflection.invoke(input={'messages': state.get('messages')}) # Invoke the reflection node by extracting messages from state-dictionary
 
         if reflection_result.is_approved: # The node approves the result
-            logging.info("   ✅ VERDICT: PASSED. Summary meets all safety standards.")
+            logging.info("VERDICT: PASSED. Summary meets all safety standards.")
             return {'messages': [HumanMessage(content="PASSED")]} # Update state-dictionary with summary PASSED
         else: # The node does not approve the result
-            logging.info("   ❌ VERDICT: FAILED. Issuing Corrective Memo.") # The summary failed the checks
-            logging.info(f"   📝 MEMO: {reflection_result.corrective_memo}") # The corrective memo is returned by the LLM
+            logging.info("VERDICT: FAILED. Issuing Corrective Memo.") # The summary failed the checks
+            logging.info(f"MEMO: {reflection_result.corrective_memo}") # The corrective memo is returned by the LLM
             return {"messages": [HumanMessage(content=f"CORRECTIVE MEMO: {reflection_result.corrective_memo}")]} # Update state dictionary with corrective memo required to fix the summary
     except Exception as e: # Exception block catch exceptions (Catch JSON parsing errors and force the LLM to try again)
         logging.info(str(e))
@@ -54,7 +53,7 @@ def should_audit(state:MessageGraph) -> str: # Router function to determine rout
     elif "PASSED" in last_message.content: # Check if the summary passes the checks
         return END # Return the terminator node
     else: # None of the above conditions matched
-        print("\n⏪ ROUTER: Sending memo back to Architect for immediate revision.") # Router is sending memo back to architect
+        logging.info("\nROUTER: Sending memo back to Architect for immediate revision.") # Router is sending memo back to architect
         return 'generation' # Return a string object representing generation node
 
 

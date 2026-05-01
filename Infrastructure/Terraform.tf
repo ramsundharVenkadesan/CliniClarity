@@ -2,7 +2,7 @@ terraform {
   required_version = "~>1.14.0"
 
   backend "gcs" {
-    bucket = "cliniclarity-tf-state"
+    bucket = "cliniclarity-tf-state-2"
     prefix = "terraform/state"
   }
 
@@ -43,4 +43,5 @@ provider "google-beta" {
   project               = var.project
   billing_project       = var.billing_project
   user_project_override = true
+
 }

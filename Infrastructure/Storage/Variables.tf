@@ -21,3 +21,7 @@ variable "registry_id" {
 variable "service_account_email" {
   type = string
 }
+
+variable "project" {
+  type = string
+}

@@ -14,7 +14,7 @@ def format_documents(docs) -> str: # Generic function to format retrieved docume
 
 async def summarize(state:GraphState) -> Dict[str, Any]: # Node to summarize the retrieved documents
     if state.get('status'): # Retrieve the ingestion status from the state dictionary
-        user_id = state.get('user_id')
+        user_id = state.get('user_id') # Retrieve user-ID associate with user
         dynamic_model = init_chat_model(model="gemini-3-flash-preview", temperature=0.0, model_provider="google_genai") # Create and initialize a LLM model
 
         system_prompt = """

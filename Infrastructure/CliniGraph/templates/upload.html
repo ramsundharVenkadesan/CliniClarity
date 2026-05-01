@@ -217,11 +217,23 @@
         // GRAB FRESH TOKEN
         const user = auth.currentUser;
         if (!user) {
-            alert("Session expired. Please log in again.");
             window.location.href = "/login";
             return;
         }
-        const freshToken = await user.getIdToken(true);
+        let freshToken;
+        try {
+            freshToken = await user.getIdToken(true);
+        } catch (error) {
+            console.error("Session invalid or user deleted on backend:", error);
+            // 1. Purge the CliniClarity report cache
+            sessionStorage.removeItem("cliniclarity_report");
+            // 2. Wipe the Firebase Auth IndexedDB cache
+            await signOut(auth);
+            // 3. Boot back to login
+            alert("Your session was terminated or the database was reset. Please log in again.");
+            window.location.href = "/login";
+            return;
+        }
 
         const submitBtn = document.getElementById('submitBtn');
         submitBtn.disabled = true;

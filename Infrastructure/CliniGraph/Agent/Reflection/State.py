@@ -1,6 +1,6 @@
 from typing import TypedDict, Annotated # Import Type-Hints package
 from langgraph.graph import add_messages # Import function to properly append messages to the state dictionary
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field # Import data-validation classes from Pydantic package
 
 
 class MessageGraph(TypedDict): # State dictionary to maintain state between nodes

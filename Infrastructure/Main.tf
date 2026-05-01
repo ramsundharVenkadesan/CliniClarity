@@ -1,54 +1,58 @@
-locals {
+locals { // Locals Code-Block
   services = ["compute.googleapis.com", "storage.googleapis.com", "cloudkms.googleapis.com",
     "run.googleapis.com", "firebase.googleapis.com", "identitytoolkit.googleapis.com",
-  "secretmanager.googleapis.com", "containerscanning.googleapis.com"]
+    "secretmanager.googleapis.com", "containerscanning.googleapis.com",
+  "cloudresourcemanager.googleapis.com", "artifactregistry.googleapis.com"] // List of services to enable
 }
 
-resource "google_project_service" "enable_apis" {
+resource "google_project_service" "enable_apis" { // Resource block to enable all APIs
   for_each = toset(local.services)
-  project  = "cliniclarity"
+  project  = var.project
   service  = each.value
 }
 
-resource "google_service_account" "cliniclarity_service_account" {
+resource "google_service_account" "cliniclarity_service_account" { // Resource block to create a service account
   account_id   = "cliniclarity-app-service"
   display_name = "CliniClarity Application Identity"
   depends_on   = [google_project_service.enable_apis]
 }
 
-module "storage" {
+module "storage" { // Module block to create storage infrastructure
   source                = "./Storage"
   depends_on            = [google_project_service.enable_apis]
   service_account_email = google_service_account.cliniclarity_service_account.email
+  project               = var.project
 }
 
-resource "null_resource" "docker_build_push" {
-  # This triggers a rebuild only if the files inside CliniGraph change
-  triggers = {
-    always_run = timestamp() # Forces a build every time you run terraform apply (Great for dev)
+resource "null_resource" "docker_build_push" { // Null resource to build and push Docker image of the AI Agent
+
+  triggers = {               // Triggers a rebuild when files inside AI Agent changes
+    always_run = timestamp() // Forces a build every time you run Terraform Apply
   }
 
   provisioner "local-exec" {
     command = <<EOT
-
-      echo "torch" >> ./CliniGraph/requirements.txt
-      # 1. Authenticate Docker to your GCP region
       gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
-      # 2. Build the image using the Dockerfile in the CliniGraph folder
-      docker build --platform linux/amd64 --no-cache --provenance=false -t us-central1-docker.pkg.dev/cliniclarity/${module.storage.artifact_repo}/cliniclarity-agent:latest ./CliniGraph
+      docker build --platform linux/amd64 --no-cache --provenance=false -t us-central1-docker.pkg.dev/${var.project}/${module.storage.artifact_repo}/cliniclarity-agent:latest ./CliniGraph
 
-      # 3. Push the image to Artifact Registry
-      docker push us-central1-docker.pkg.dev/cliniclarity/${module.storage.artifact_repo}/cliniclarity-agent:latest
+      docker push us-central1-docker.pkg.dev/${var.project}/${module.storage.artifact_repo}/cliniclarity-agent:latest
     EOT
   }
 
-  # Ensure the registry exists before we try to push to it
-  depends_on = [module.storage]
+  depends_on = [module.storage] // Manual dependency to ensure artifact registry exists before pushing
+}
+
+resource "null_resource" "firebase_user_purge" { // Null resource to destroy all identities in Firebase
+  provisioner "local-exec" {
+    when    = destroy
+    command = "python3 Purge_Users.py"
+  }
+
 }
 
 
-module "compute" {
+module "compute" { // Module block to create compute infrastructure
   source     = "./Compute"
   depends_on = [google_project_service.enable_apis, null_resource.docker_build_push]
 
@@ -67,7 +71,7 @@ module "compute" {
   display_name               = "CliniClarity Web App"
 }
 
-import {
+import { // Import block to import an existing auth-config for Firebase
   id = "projects/${var.project}"
   to = module.compute.google_identity_platform_config.auth_config
-}
+} // Comment this block out, if the GCP project is brand new
