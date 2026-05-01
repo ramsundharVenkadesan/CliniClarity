@@ -1,7 +1,7 @@
 This document provides a deep dive into the system design, data flow, and security posture of CliniClarity.
 
 # 1. System Overview
-CliniClarity is architected as a serverless, event-driven system on Google Cloud Platform (GCP). The core logic is encapsulated in a Python-based FastAPI application deployed to Cloud Run, ensuring high availability and automatic scaling based on request demand.
+CliniClarity is architected as a serverless, event-driven system on **Google Cloud Platform (GCP)**. The core logic is encapsulated in a **Python**-based **FastAPI** application deployed to **Cloud Run**, ensuring high availability and automatic scaling based on request demand.
 
 ---
 
@@ -18,7 +18,7 @@ The platform utilizes a cyclic reasoning lifecycle rather than a linear pipeline
 # 3. Data Infrastructure
 * **Vector Database:** Pinecone Serverless manages high-dimensional embeddings (1536 dimensions) for sub-second retrieval.
 * **Data Persistence: Google Cloud Storage (GCS)** stores temporary document summaries in a 15-minute encrypted cache.
-* **Secrets & Encryption: Cloud KMS** manages the encryption keys for storage buckets, while Secret Manager handles all external API credentials.
+* **Secrets & Encryption: Cloud KMS** manages the encryption keys for storage buckets, while **Secret Manager** handles all external API credentials.
 
 ---
 
