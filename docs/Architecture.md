@@ -9,9 +9,9 @@ CliniClarity is architected as a serverless, event-driven system on **Google Clo
 The platform utilizes a cyclic reasoning lifecycle rather than a linear pipeline. The state is managed via a `GraphState` dictionary that tracks the document through various stages of processing.
 * **Ingestion Node:** Reads the PDF, extracts text, and generates a document hash for caching.
 * **Privacy Node (Presidio):** Localized sanitization of PII/PHI identifiers.
-* **Vectorization Node:** Upserts anonymized embeddings into Pinecone Serverless.
-* **Synthesis Node:** A ReAct loop that coordinates with the Gemini 3 Flash model and medical search tools.
-* **Audit Node:** Final mathematical verification of the summary using DeepEval.
+* **Vectorization Node:** Upserts anonymized embeddings into **Pinecone Serverless**.
+* **Synthesis Node:** A ReAct loop that coordinates with the **Gemini 3 Flash model** and medical search tools.
+* **Audit Node:** Final mathematical verification of the summary using **DeepEval**.
 
 ---
 
