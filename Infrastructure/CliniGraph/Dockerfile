@@ -19,6 +19,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
+
+RUN python -c "from transformers import pipeline; pipeline('text-classification', model='protectai/deberta-v3-base-prompt-injection-v2')"
+
 # Copy the rest of your application code
 # This includes API.py, RAG.py, REACT.py, and your templates folder
 COPY . .

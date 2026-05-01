@@ -5,11 +5,11 @@ from starlette.templating import Jinja2Templates # Import class to render HTML f
 from Agent.RAG_Graph.Workflow import rag_app # Import the complied graph
 from pypdf import PdfReader # Import class to read input PDF documents
 from Agent.Security.Validation import * # Import validation functions
-from transformers import pipeline # Import pipeline package to import various models
 from google.cloud import storage # Import GCS storage client
 from firebase_admin import auth # Import Firebase Admin authentication
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials # Import Bearer token and Authorization Credentials class
 from Agent.RAG_Graph.Ingestion import vector_database # Import the Pinecone Vector-Database
+from Agent.Security.PromptInjection import is_prompt_injection
 
 storage_client = storage.Client() # Initialize GCS storage client
 import logging # Import logging framework
@@ -27,20 +27,6 @@ def verify_token(credentials:HTTPAuthorizationCredentials=Depends(security)): # 
 
 rag_router = APIRouter(tags=["Summary"], prefix="/summary") # API Router to generate a summary
 templates = Jinja2Templates(directory="templates") # Retrieve HTML files from the templates directory
-
-ingress_scanner = pipeline(task="text-classification", model="protectai/deberta-v3-base-prompt-injection-v2") # Retrieve model to detect prompt-injection in the input document(s)
-
-async def scan_for_prompt_injection(text: str) -> bool: # Asynchronous function to detect any prompt injection or malicious content
-    """Scans the uploaded document for malicious prompt injections.""" # Doc-String used as metadata
-    result = ingress_scanner(text[:1000], truncation=True, max_length=512) # Only scan the first 1000 characters for any prompt injection
-
-    label = result[0]['label'] # Retrieve resulting label
-    score = result[0]['score'] # Retrieve resulting score
-
-    if label == "INJECTION" and score > 0.8: # Model is highly confident that the input document is malicious
-        logging.error(f"🚨 INGRESS FIREWALL TRIGGERED: {score} confidence.") # Log the firewall trigger due to malicious content
-        return True # Return statement to indicate input document is malicious
-    return False # Return statement to indicate input document is not malicious
 
 
 @rag_router.post("/") # Post Request to accept input document(s) from user
@@ -70,7 +56,7 @@ async def generate_summary(request: Request, file: UploadFile, run_eval: bool = 
 
                 yield f"data: {json.dumps({'type': 'status', 'step': 'Scanning for Cyber Threats...'})}\n\n" # Scanning medical document
 
-                is_attack = await scan_for_prompt_injection(first_page_text) # Invoke function to scan for any prompt injection
+                is_attack = await is_prompt_injection(first_page_text[:1000]) # Invoke function to scan for any prompt injection
 
                 if is_attack: # The input document contains malicious content
                     yield f"data: {json.dumps({'type': 'error', 'message': 'Security Alert: Malicious prompt injection detected in document.'})}\n\n" # Error message to terminate stream

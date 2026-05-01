@@ -49,15 +49,15 @@ class GeminiEvaluator(DeepEvalBaseLLM): # This safely bridges Gemini's API with 
 
     def get_model_name(self): return "Gemini Flash Lite" # Identify which model performed the audit logs
 
+gemini_judge = GeminiEvaluator() # Instantiate the safe Gemini wrapper
+metric = FaithfulnessMetric(threshold=0.9, model=gemini_judge, include_reason=False) # Initialize the HIPAA-ready DeepEval metric
+
 
 
 async def hallucination(state: GraphState) -> Dict[str, Any]: # Function to perform the checks
     logging.info("Running DeepEval Faithfulness Check!") # Log the check
 
     summary, context, query = state.get('summary'), state['context'], "summarize the report" # Retrieve contents from state-dictionary
-
-    gemini_judge = GeminiEvaluator() # Instantiate the safe Gemini wrapper
-    metric = FaithfulnessMetric(threshold=0.9, model=gemini_judge, include_reason=False) # Initialize the HIPAA-ready DeepEval metric
     test_case = LLMTestCase(input=query, actual_output=summary, retrieval_context=context) # Initialize the test case for a model
 
     logging.info("Evaluating Groundedness using DeepEval...") # Start the evaluation
