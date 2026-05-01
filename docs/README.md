@@ -314,7 +314,9 @@ To ensure Protected Health Information (PHI) is never exposed to public models o
 For a deeper dive into the engineering decisions, compliance standards, and future plans for CliniClarity, please refer to our official documentation library:
 
 * **[Product Requirements Document (PRD)](PRD.md):** The complete architectural blueprint, user personas, and success metrics.
+* **[System Architecture & Data Flow](Architecture.md):** A technical deep-dive into our **GCP** serverless design, visualizing the cyclic **LangGraph** agentic lifecycle and the end-to-end security topology.
 * **[Security & Compliance Architecture](Compliance.md):** Details on our zero-trust ingress, irreversible local redaction, and HIPAA-aligned vector isolation.
+* **[Testing & Quality Assurance Framework](Testing.md):** An overview of our multi-layered validation pipeline, covering **DeepEval** groundedness benchmarks, adversarial security scanning, and infrastructure-level integrity checks.
 * **[V1.0 Execution Roadmap](Roadmap.md):** Our project timeline, milestones, and transition to a cloud-native agentic architecture.
   
 * **Architecture Decision Records (ADRs):**
