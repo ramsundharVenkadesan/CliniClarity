@@ -12,6 +12,7 @@ Before deploying, ensure you have the following installed and configured on your
 2. **[Google Cloud CLI (`gcloud`)](https://cloud.google.com/sdk/docs/install)**
 3. **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** (Must be running during deployment for Terraform to build and push the container)
 
+### Required Accounts & API Keys
 You will also need active accounts and API keys for the following services:
 * **Google Cloud Platform:** A project with billing enabled.
 * **Firebase:** A project linked to your GCP project.
@@ -19,6 +20,22 @@ You will also need active accounts and API keys for the following services:
 * **Google AI Studio:** A Gemini API key.
 * **HuggingFace:** An access token (for the prompt-injection security scanner).
 * **LangSmith / LangChain:** An API key for agent tracing and observability.
+
+### Required IAM Permissions
+The identity executing the Terraform deployment (either your local user account or a CI/CD service account) must have the following GCP IAM roles granted:
+* `roles/owner` **OR** a custom combination of the following for strict least-privilege:
+     * `roles/resourcemanager.projectIamAdmin` (Required to bind policies)
+     * `roles/serviceusage.serviceUsageAdmin`
+     * `roles/iam.serviceAccountAdmin`
+     * `roles/storage.admin`
+     * `roles/cloudkms.admin`
+     * `roles/artifactregistry.admin`
+     * `roles/run.admin`
+     * `roles/secretmanager.admin`
+     * `roles/firebase.admin`
+     * `roles/identityplatform.admin`
+
+*(Note: If you are deploying this manually using the same Google account that created the GCP project, you are automatically assigned the `Owner` role and do not need to configure these individually).*
 
 ---
 
